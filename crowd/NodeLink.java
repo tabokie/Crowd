@@ -13,6 +13,8 @@ public class NodeLink {
 	public Arc curve;
 	public Vec2f fromPoint = new Vec2f();
 	public Vec2f toPoint = new Vec2f();
+	public Vec2f centerPoint = new Vec2f();
+	private boolean speculativeStateReady = false;
 	NodeLink(Arc c) {
 		curve = c;
 	}
@@ -24,74 +26,134 @@ public class NodeLink {
     pane.getChildren().add(curve);
     return new NodeLink(curve);
 	}
-	public void updateEnd(float x, float y, float cx, float cy) {
+	public float getStartX() {
+		float x = (float)curve.getCenterX();
+		float start = (float)curve.getStartAngle();
+		float r = (float)curve.getRadiusX();
+		return (float)Math.cos(Math.toRadians(start)) * r + x;
+	}
+	public float getStartY() {
+		float y = (float)curve.getCenterY();
+		float start = (float)curve.getStartAngle();
+		float r = (float)curve.getRadiusX();
+		return y - (float)Math.sin(Math.toRadians(start)) * r;
+	}
+	public float getEndX() {
+		float x = (float)curve.getCenterX();
+		float start = (float)curve.getStartAngle() + (float)curve.getLength();
+		float r = (float)curve.getRadiusX();
+		return (float)Math.cos(Math.toRadians(start)) * r + x;
+	}
+	public float getEndY() {
+		float y = (float)curve.getCenterY();
+		float start = (float)curve.getStartAngle() + (float)curve.getLength();
+		float r = (float)curve.getRadiusX();
+		return y - (float)Math.sin(Math.toRadians(start)) * r;
+	}
+	public void setEnd(float x, float y, float cx, float cy) {
+		solveNodeLink(curve, getStartX(), getStartY(), x, y, cx, cy);
 		toPoint.data[0] = x;
 		toPoint.data[1] = y;
-		update(cx, cy);
+		centerPoint.data[0] = cx;
+		centerPoint.data[1] = cy;
 	}
-	public void updateStart(float x, float y, float cx, float cy) {
-		fromPoint.data[0] = x; 
+	public void setStart(float x, float y, float cx, float cy) {
+		solveNodeLink(curve, x, y, getEndX(), getEndY(), cx, cy);
+		fromPoint.data[0] = x;
 		fromPoint.data[1] = y;
-		update(cx, cy);
+		centerPoint.data[0] = cx;
+		centerPoint.data[1] = cy;
 	}
-	public void update(float cx, float cy) {
-		float denom = (cx-fromPoint.data[0]) * (toPoint.data[1]-fromPoint.data[1]) - (toPoint.data[0]-fromPoint.data[0]) * (cy-fromPoint.data[1]);
-		float w1 = fromPoint.data[0] * (cx-fromPoint.data[0]) + fromPoint.data[1] * (cy-fromPoint.data[1]);
-		float w2 = cx * (toPoint.data[0]-fromPoint.data[0]) + cy * (toPoint.data[1]-fromPoint.data[1]);
-		float centerX = (w1 * (toPoint.data[1]-fromPoint.data[1]) - w2 * (cy-fromPoint.data[1])) / denom;
-		float centerY = (w2 * (cx-fromPoint.data[0]) - w1 * (toPoint.data[0]-fromPoint.data[0])) / denom;
-		curve.setCenterX(centerX);
-		curve.setCenterY(centerY);
-		float oldRadius = (float)(Math.pow(cx-fromPoint.data[0], 2) + Math.pow(cy-fromPoint.data[1], 2));
+	public void speculateStart(float x, float y, float cx, float cy) {
+		fromPoint.data[0] = x;
+		fromPoint.data[1] = y;
+		centerPoint.data[0] = cx;
+		centerPoint.data[1] = cy;
+		speculativeStateReady = true;
+	} 
+	public void speculateEnd(float x, float y, float cx, float cy) {
+		toPoint.data[0] = x;
+		toPoint.data[1] = y;
+		centerPoint.data[0] = cx;
+		centerPoint.data[1] = cy;
+		speculativeStateReady = true;
+	}
+	public float getSpeculativeStartX() {
+		return fromPoint.data[0];
+	}
+	public float getSpeculativeStartY() {
+		return fromPoint.data[1];
+	}
+	public float getSpeculativeEndX() {
+		return toPoint.data[0];
+	}
+	public float getSpeculativeEndY() {
+		return toPoint.data[1];
+	}
+	public float getSpeculativeCenterX() {
+		return centerPoint.data[0];
+	}
+	public float getSpeculativeCenterY() {
+		return centerPoint.data[1];
+	}
+	public void exportSpeculativeState(List<KeyValue> kvs) {
+		if(speculativeStateReady){
+			solveNodeLink(curve, 
+				getSpeculativeStartX(), getSpeculativeStartY(), 
+				getSpeculativeEndX(), getSpeculativeEndY(), 
+				getSpeculativeCenterX(), getSpeculativeCenterY(),
+				kvs);	
+		}
+		speculativeStateReady = false;
+	}
+	static public void solveNodeLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy) { // clockwise ?
+		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
+		float w1 = ax * (cx-ax) + ay * (cy-ay);
+		float w2 = cx * (bx-ax) + cy * (by-ay);
+		float centerX = (w1 * (by-ay) - w2 * (cy-ay)) / denom;
+		float centerY = (w2 * (cx-ax) - w1 * (bx-ax)) / denom;
+		c.setCenterX(centerX);
+		c.setCenterY(centerY);
+		float oldRadius = (float)(Math.pow(cx-ax, 2) + Math.pow(cy-ay, 2));
 		float newRadius = (float)((Math.pow(cx-centerX, 2) + Math.pow(cy-centerY, 2)) - oldRadius);
 		oldRadius = (float)Math.sqrt(oldRadius);
 		newRadius = (float)Math.sqrt(newRadius);
-		curve.setRadiusX(newRadius);
-		curve.setRadiusY(newRadius);
+		c.setRadiusX(newRadius);
+		c.setRadiusY(newRadius);
 		float start;
-		if(Math.abs(fromPoint.data[0]-centerX) > 0.0001) start = (float)Math.atan(- (fromPoint.data[1]-centerY) / (fromPoint.data[0]-centerX)); // negate w.r.t. to coord
-		else if(fromPoint.data[1] < centerX) start = (float)Math.PI / 2.0f;
+		if(Math.abs(ax-centerX) > 0.0001) start = (float)Math.atan(- (ay-centerY) / (ax-centerX)); // negate w.r.t. to coord
+		else if(ay < centerX) start = (float)Math.PI / 2.0f;
 		else start = -(float)Math.PI / 2.0f;
-		// if(fromPoint.data[1] > centerY) start += (float) Math.PI; // center is above start point
-		if(fromPoint.data[0] < centerX) start += (float) Math.PI;
-		// if(fromPoint.data[1] < centerY && fromPoint.data[0] < centerX && start > 0 || 
-			// fromPoint.data[1] < centerY && fromPoint.data[0] > centerX && start < 0) start += (float) Math.PI;
-		curve.setStartAngle(Math.toDegrees(start));
+		// if(ay > centerY) start += (float) Math.PI; // center is above start point
+		if(ax < centerX) start += (float) Math.PI;
+		// if(ay < centerY && ax < centerX && start > 0 || 
+			// ay < centerY && ax > centerX && start < 0) start += (float) Math.PI;
+		c.setStartAngle(Math.toDegrees(start));
 		float length = (float)Math.atan(oldRadius / newRadius) * 2;
-		curve.setLength(Math.toDegrees(length));
-		System.out.println(curve.toString());
+		c.setLength(Math.toDegrees(length));
+		System.out.println(c.toString());
 	}
-	public void move(float cx, float cy, List<KeyValue> kvs) {
-		float denom = (cx-fromPoint.data[0]) * (toPoint.data[1]-fromPoint.data[1]) - (toPoint.data[0]-fromPoint.data[0]) * (cy-fromPoint.data[1]);
-		float w1 = fromPoint.data[0] * (cx-fromPoint.data[0]) + fromPoint.data[1] * (cy-fromPoint.data[1]);
-		float w2 = cx * (toPoint.data[0]-fromPoint.data[0]) + cy * (toPoint.data[1]-fromPoint.data[1]);
-		float centerX = (w1 * (toPoint.data[1]-fromPoint.data[1]) - w2 * (cy-fromPoint.data[1])) / denom;
-		float centerY = (w2 * (cx-fromPoint.data[0]) - w1 * (toPoint.data[0]-fromPoint.data[0])) / denom;
-		kvs.add(new KeyValue(curve.centerXProperty(), centerX));
-		kvs.add(new KeyValue(curve.centerYProperty(), centerY));
-		float oldRadius = (float)(Math.pow(cx-fromPoint.data[0], 2) + Math.pow(cy-fromPoint.data[1], 2));
+	static public void solveNodeLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy, List<KeyValue> kvs) {
+		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
+		float w1 = ax * (cx-ax) + ay * (cy-ay);
+		float w2 = cx * (bx-ax) + cy * (by-ay);
+		float centerX = (w1 * (by-ay) - w2 * (cy-ay)) / denom;
+		float centerY = (w2 * (cx-ax) - w1 * (bx-ax)) / denom;
+		kvs.add(new KeyValue(c.centerXProperty(), centerX));
+		kvs.add(new KeyValue(c.centerYProperty(), centerY));
+		float oldRadius = (float)(Math.pow(cx-ax, 2) + Math.pow(cy-ay, 2));
 		float newRadius = (float)((Math.pow(cx-centerX, 2) + Math.pow(cy-centerY, 2)) - oldRadius);
 		oldRadius = (float)Math.sqrt(oldRadius);
 		newRadius = (float)Math.sqrt(newRadius);
-		kvs.add(new KeyValue(curve.radiusXProperty(), newRadius));
-		kvs.add(new KeyValue(curve.radiusYProperty(), newRadius));
+		kvs.add(new KeyValue(c.radiusXProperty(), newRadius));
+		kvs.add(new KeyValue(c.radiusYProperty(), newRadius));
 		float start;
-		if(Math.abs(fromPoint.data[0]-centerX) > 0.0001) start = (float)Math.atan(- (fromPoint.data[1]-centerY) / (fromPoint.data[0]-centerX)); // negate w.r.t. to coord
-		else if(fromPoint.data[1] < centerX) start = (float)Math.PI / 2.0f;
+		if(Math.abs(ax-centerX) > 0.0001) start = (float)Math.atan(- (ay-centerY) / (ax-centerX)); // negate w.r.t. to coord
+		else if(ay < centerX) start = (float)Math.PI / 2.0f;
 		else start = -(float)Math.PI / 2.0f;
-		if(fromPoint.data[0] < centerX) start += (float) Math.PI;
-		kvs.add(new KeyValue(curve.startAngleProperty(), Math.toDegrees(start)));
+		if(ax < centerX) start += (float) Math.PI;
+		kvs.add(new KeyValue(c.startAngleProperty(), Math.toDegrees(start)));
 		float length = (float)Math.atan(oldRadius / newRadius) * 2;
-		kvs.add(new KeyValue(curve.lengthProperty(), Math.toDegrees(length)));
-	}
-	public void moveEnd(float x, float y, float cx, float cy, List<KeyValue> kvs) {
-		toPoint.data[0] = x;
-		toPoint.data[1] = y;
-		move(cx, cy, kvs);
-	}
-	public void moveStart(float x, float y, float cx, float cy, List<KeyValue> kvs) {
-		fromPoint.data[0] = x; 
-		fromPoint.data[1] = y;
-		move(cx, cy, kvs);
+		kvs.add(new KeyValue(c.lengthProperty(), Math.toDegrees(length)));
 	}
 }

@@ -16,11 +16,10 @@ import javafx.animation.*;
 public class GroupNode {
 	// manager of nodes
 	private List<Node> members = new ArrayList<Node>();
-	private Vec2f centerPosition = new Vec2f();
+	private Vec2f position = new Vec2f(-1, -1);
 	private Node center = null;
 	// as member of GroupNode
-	private boolean coldInstalled = true;
-	private Ellipse vcenter;
+	private Ellipse vcenter = new Ellipse();
 	private List<GroupLink> from = new ArrayList<GroupLink>();
 	private List<GroupLink> to = new ArrayList<GroupLink>();
 	private Pane pane;
@@ -28,12 +27,11 @@ public class GroupNode {
 	private int level = 0;
 
 	GroupNode(Pane pa, String name, Vec2f p) {
-		centerPosition.copy(p);
+		position.copy(p);
 		pane = pa;
 		id = name;
-		vcenter = new Ellipse();
-    vcenter.setCenterX(centerPosition.data[0]);
-    vcenter.setCenterY(centerPosition.data[1]);
+    vcenter.setCenterX(position.data[0]);
+    vcenter.setCenterY(position.data[1]);
     vcenter.setRadiusX(3);
     vcenter.setRadiusY(3);
     vcenter.setFill(Color.WHITE);
@@ -44,9 +42,8 @@ public class GroupNode {
 	GroupNode(Pane pa, String name) {
 		pane = pa;
 		id = name;
-		vcenter = new Ellipse();
-    vcenter.setCenterX(0);
-    vcenter.setCenterY(0);
+    vcenter.setCenterX(-1);
+    vcenter.setCenterY(-1);
     vcenter.setRadiusX(3);
     vcenter.setRadiusY(3);
     vcenter.setFill(Color.WHITE);
@@ -55,6 +52,14 @@ public class GroupNode {
     pane.getChildren().add(vcenter);
 	}
 	GroupNode() { }
+	public String toString() {
+		String ret = new String(id + ": (" + String.valueOf(getCenterX()) + ", " + String.valueOf(getCenterY())
+			+ ") -> ");
+		for(GroupLink l : to ) {
+			ret += l.toString();
+		}
+		return ret;
+	}
 	static GroupNode NewDummy() {
 		GroupNode ret = new GroupNode();
 		ret.pane = null;
@@ -70,23 +75,34 @@ public class GroupNode {
 	public String getId() {
 		return id;
 	}
-	public Vec2f getCenter() {
-		return centerPosition;
+	public float getSpeculativeCenterX() {
+		return position.data[0];
+	}
+	public float getSpeculativeCenterY() {
+		return position.data[1];
+	}
+	public float getCenterX() {
+		return (float)vcenter.getCenterX();
+	}
+	public float getCenterY() {
+		return (float)vcenter.getCenterY();
 	}
 	public void fromLink(GroupLink link) {
 		link.toGroup = (id);
-		link.updateEnd(centerPosition.data[0], centerPosition.data[1]);
+		link.setEnd(getCenterX(), getCenterY());
 		from.add(link);
+		link.speculateEnd(getSpeculativeCenterX(), getSpeculativeCenterY());
 	}
 	public void toLink(GroupLink link) {
 		link.fromGroup = id;
-		link.updateStart(centerPosition.data[0], centerPosition.data[1]);
+		link.setStart(getCenterX(), getCenterY());
 		to.add(link);
+		link.speculateStart(getSpeculativeCenterX(), getSpeculativeCenterY());
 	}
 	public void addMember(Node node) {
 		if(node != null) {
 			members.add(node);
-			expandLayout();
+			speculateNodes();
 		}
 	}
 	public void connectNode(Node a, Node b) { // from little end to higher end
@@ -111,87 +127,95 @@ public class GroupNode {
 		toNode.fromLink(link);
 	}
 	final float initialRadius = 30;
-	private float radius = 30;
-	public void shrinkLayout() { // clockwise
-		final Timeline timeline = new Timeline();
-		List<KeyValue> kvs = new ArrayList<KeyValue>();
+	public void speculateNodes() {
 		float total = members.size();
-		radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;
+		float radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;
 		float cur = 0;
 		for(Node node : members ) {
 			float half = 1.0f / total * (float)Math.PI;
-			node.moveTo(centerPosition.data[0] + radius * (float)Math.cos(cur + half), 
-				centerPosition.data[1] + radius * (float)Math.sin(cur + half), kvs);
+			node.speculateCenter(position.data[0] + radius * (float)Math.cos(cur + half), 
+				position.data[1] + radius * (float)Math.sin(cur + half));
 			cur += half * 2;
 		}
-		KeyFrame frame = new KeyFrame(Duration.millis(2000), "moveMe", null, kvs);
-		timeline.getKeyFrames().add(frame);	
-		timeline.play();
 	}
-	public void expandLayout() { // anti-clockwise
-		final Timeline timeline = new Timeline();
-		List<KeyValue> kvs = new ArrayList<KeyValue>();
-		float total = members.size();
-		radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;
-		float cur = 0;
-		for(Node node : members ) {
-			float half = 1.0f / total * (float)Math.PI;
-			node.moveTo(centerPosition.data[0] + radius * (float)Math.cos(cur + half), 
-				centerPosition.data[1] + radius * (float)Math.sin(cur + half), 
-				kvs);
-			cur += half * 2;
-		}
-		KeyFrame frame = new KeyFrame(Duration.millis(2000), "moveMe", null, kvs);
-		timeline.getKeyFrames().add(frame);	
-		timeline.play();
-	}
-	public void moveLayout(float x, float y) { // move with center, use lineTo transition
-		final Timeline timeline = new Timeline();
-		List<KeyValue> kvs = new ArrayList<KeyValue>();
-		// EventHandler onFinished = new EventHandler<ActionEvent>() {
-		// 	public void handle(ActionEvent e) {
-		// 		System.out.println("event terminated");
-		// 	}
-		// };
-		if(coldInstalled) {
-			if(vcenter != null) {
-				vcenter.setCenterX(x);
-				vcenter.setCenterY(y);
-			}
+	public void speculateLinks() {
+		float x = position.data[0];
+		float y = position.data[1];
+		if(getCenterX() < 0) {
 			for(GroupLink link : from) {
-				link.updateEnd(x, y);
+				link.setEnd(x, y);
 			}
 			for(GroupLink link : to) {
-				link.updateStart(x, y);
+				link.setStart(x, y);
 			}
-			coldInstalled = false;
 		}
 		else {
-			if(vcenter != null){
-				kvs.add(new KeyValue(vcenter.centerXProperty(), x));
-				kvs.add(new KeyValue(vcenter.centerYProperty(), y));
-			}
 			for(GroupLink link : from) {
-				link.moveEnd(x, y, kvs);
+				link.speculateEnd(x, y);
 			}
 			for(GroupLink link : to) {
-				link.moveStart(x, y, kvs);
+				link.speculateStart(x, y);
 			}
 		}
-		centerPosition.data[0] = x;
-		centerPosition.data[1] = y;
-
-		float total = members.size();
-		radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;
-		float cur = 0;
-		for(Node node : members ) {
-			float half = 1.0f / total * (float)Math.PI;
-			node.moveTo(x + radius * (float)Math.cos(cur + half), 
-				y + radius * (float)Math.sin(cur + half), kvs);
-			cur += half * 2;
-		}
-		KeyFrame frame = new KeyFrame(Duration.millis(2000), "moveMe", null, kvs);
-		timeline.getKeyFrames().add(frame);	
-		timeline.play();
 	}
+	private boolean speculativeStateReady = false;
+	public void speculateCenter(float x, float y) {
+		speculateLinks();
+		speculateNodes();
+		if(getCenterX() < 0) {
+			vcenter.setCenterX(x);
+			vcenter.setCenterY(y);
+		}
+		else {
+			speculativeStateReady = true;
+		}
+		position.data[0] = x;
+		position.data[1] = y;
+	}
+	public void exportSpeculativeState(List<KeyValue> kvs) {
+		if(speculativeStateReady) {
+			kvs.add(new KeyValue(vcenter.centerXProperty(), getSpeculativeCenterX()));
+			kvs.add(new KeyValue(vcenter.centerYProperty(), getSpeculativeCenterY()));
+		}
+		speculativeStateReady = false;
+		for(GroupLink link : from) {
+			link.exportSpeculativeState(kvs);
+		}
+		for(GroupLink link : to) {
+			link.exportSpeculativeState(kvs);
+		}
+		for(Node node: members) {
+			node.exportSpeculativeState(kvs);
+		}
+	}
+	// public void setNodes() {
+	// 	float total = members.size();
+	// 	float radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;
+	// 	float cur = 0;
+	// 	for(Node node : members ) {
+	// 		float half = 1.0f / total * (float)Math.PI;
+	// 		node.setCenter(position.data[0] + radius * (float)Math.cos(cur + half), 
+	// 			position.data[1] + radius * (float)Math.sin(cur + half));
+	// 		cur += half * 2;
+	// 	}
+	// }
+	// public void setLinks() {
+	// 	float x = position.data[0];
+	// 	float y = position.data[1];
+	// 	for(GroupLink link : from) {
+	// 		link.setEnd(x, y);
+	// 	}
+	// 	for(GroupLink link : to) {
+	// 		link.setStart(x, y);
+	// 	}
+	// }
+	// public void setCenter(float x, float y) {
+	// 	position.data[0] = x;
+	// 	position.data[1] = y;
+	// 	speculativeStateReady = false;
+	// 	vcenter.setCenterX(x);
+	// 	vcenter.setCenterY(y);
+	// 	setNodes();
+	// 	setLinks();
+	// }
 }

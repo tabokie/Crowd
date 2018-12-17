@@ -10,8 +10,8 @@ import javafx.animation.KeyValue;
 import java.util.*;
 
 public class Node {
-	private Vec2f position = new Vec2f();
-	public Ellipse self = null;
+	private Vec2f position = new Vec2f(-1, -1);
+	public Ellipse self = new Ellipse() ;
 	private GroupNode parent;
 	private Pane pane;
 	private String id;
@@ -22,45 +22,70 @@ public class Node {
 		parent = group;
 		pane = p;
 		id = name;
+    self.setCenterX(-1);
+    self.setCenterY(-1);
+    self.setRadiusX(2);
+    self.setRadiusY(2);
+    pane.getChildren().add(self);
 		parent.addMember(this);
 	}
 	public String getId() {
 		return id;
 	}
-	public void moveTo(Vec2f a, List<KeyValue> list) {
-		moveTo(a.data[0], a.data[1], list);
+	public float getCenterX() {
+		return (float)self.getCenterX();
 	}
-	public void moveTo(float x, float y, List<KeyValue> appendList) {
-		if(self == null) {
-			self = new Ellipse();
-	    self.setCenterX(x);
-	    self.setCenterY(y);
-	    self.setRadiusX(2);
-	    self.setRadiusY(2);
-	    pane.getChildren().add(self);
+	public float getCenterY() {
+		return (float)self.getCenterY();
+	}
+	public float getSpeculativeCenterX() {
+		return position.data[0];
+	}
+	public float getSpeculativeCenterY() {
+		return position.data[1];
+	}
+	private boolean speculativeStateReady = false;
+	public void speculateCenter(float x, float y) {
+		if(getCenterX() < 0) {
+			self.setCenterX(x);
+			self.setCenterY(y);
 		}
-		else{
-			appendList.add(new KeyValue(self.centerXProperty(), x));
-			appendList.add(new KeyValue(self.centerYProperty(), y));
-		}
-		for(NodeLink link: from) {
-			link.moveEnd(x, y, parent.getCenter().data[0], parent.getCenter().data[1], appendList);
-		}
-		for(NodeLink link: from) {
-			link.moveStart(x, y, parent.getCenter().data[0], parent.getCenter().data[1], appendList);
+		else {
+			for(NodeLink link: from) {
+				link.speculateEnd(x, y, parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
+			}
+			for(NodeLink link: from) {
+				link.speculateStart(x, y, parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
+			}
+			speculativeStateReady = true;
 		}
 		position.data[0] = x;
 		position.data[1] = y;
 	}
+	public void exportSpeculativeState(List<KeyValue> appendList) {
+		if(speculativeStateReady) {
+			appendList.add(new KeyValue(self.centerXProperty(), getSpeculativeCenterX()));
+			appendList.add(new KeyValue(self.centerYProperty(), getSpeculativeCenterY()));
+		}
+		for(NodeLink link: from) {
+			link.exportSpeculativeState(appendList);
+		}
+		for(NodeLink link: from) {
+			link.exportSpeculativeState(appendList);
+		}
+		speculativeStateReady = false;
+	}
 	public void fromLink(NodeLink link) {
 		from.add(link);
 		link.toNode = id;
-		link.updateEnd(position.data[0], position.data[1], parent.getCenter().data[0], parent.getCenter().data[1]);
+		link.setEnd(getCenterX(), getCenterY(), parent.getCenterX(), parent.getCenterY());
+		link.speculateEnd(getSpeculativeCenterX(), getSpeculativeCenterY(), parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 	}
 	public void toLink(NodeLink link) {
 		to.add(link);
 		link.fromNode = id;
-		link.updateStart(position.data[0], position.data[1], parent.getCenter().data[0], parent.getCenter().data[1]);
+		link.setStart(getCenterX(), getCenterY(), parent.getCenterX(), parent.getCenterY());
+		link.speculateStart(getSpeculativeCenterX(), getSpeculativeCenterY(), parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 	}
 	public GroupNode getParent() {
 		return parent;

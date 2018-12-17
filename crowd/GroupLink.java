@@ -10,9 +10,18 @@ import java.util.*;
 public class GroupLink {
 	public String fromGroup;
 	public String toGroup;
+	private Vec2f startPosition = new Vec2f();
+	private Vec2f endPosition = new Vec2f();
 	public CubicCurve curve;
 	GroupLink(CubicCurve c) {
 		curve = c;
+	}
+	public String toString() {
+		return new String("[" 
+			+ String.valueOf(curve.getControlX1()) + ", " 
+			+ String.valueOf(curve.getControlY1()) + "; "
+			+ String.valueOf(curve.getControlX2()) + ", " 
+			+ String.valueOf(curve.getControlY2()) + "]");
 	}
 	public static GroupLink NewLink(Pane pane) {
 		CubicCurve curve = new CubicCurve();
@@ -22,7 +31,9 @@ public class GroupLink {
     pane.getChildren().add(curve);
     return new GroupLink(curve);
 	}
-	public void updateEnd(float x, float y) {
+	public void setEnd(float x, float y) {
+		endPosition.data[0] = x;
+		endPosition.data[1] = y;
 		curve.setEndX(x);
 		curve.setEndY(y);
 		double deltaX = curve.getEndX() - curve.getStartX();
@@ -30,7 +41,9 @@ public class GroupLink {
 		curve.setControlX2(x - deltaX / 2.0f);
 		curve.setControlY2(y);
 	}
-	public void updateStart(float x, float y) {
+	public void setStart(float x, float y) {
+		startPosition.data[0] = x;
+		startPosition.data[1] = y;
 		curve.setStartX(x);
 		curve.setStartY(y);
 		double deltaX = curve.getEndX() - curve.getStartX();
@@ -38,18 +51,52 @@ public class GroupLink {
 		curve.setControlX2(curve.getEndX() - deltaX / 2.0f);
 		curve.setControlY1(y);
 	}
-	public void moveEnd(float x, float y, List<KeyValue> kvs) {
-		kvs.add(new KeyValue(curve.endXProperty(), x));
-		kvs.add(new KeyValue(curve.endYProperty(), y));
-		kvs.add(new KeyValue(curve.controlX1Property(), curve.getStartX() + (curve.getEndX() - curve.getStartX()) / 2.0f));
-		kvs.add(new KeyValue(curve.controlX2Property(), x - (curve.getEndX() - curve.getStartX()) / 2.0f));
-		kvs.add(new KeyValue(curve.controlY2Property(), y));
+	public float getStartX() {
+		return (float)curve.getStartX();
 	}
-	public void moveStart(float x, float y, List<KeyValue> kvs) {
-		kvs.add(new KeyValue(curve.startXProperty(), x));
-		kvs.add(new KeyValue(curve.startYProperty(), y));
-		kvs.add(new KeyValue(curve.controlX1Property(), x + (curve.getEndX() - curve.getStartX()) / 2.0f));
-		kvs.add(new KeyValue(curve.controlX2Property(), curve.getEndX() - (curve.getEndX() - curve.getStartX()) / 2.0f));
-		kvs.add(new KeyValue(curve.controlY1Property(), y));
+	public float getStartY() {
+		return (float)curve.getStartY();
+	}
+	public float getEndX() {
+		return (float)curve.getEndX();
+	}
+	public float getEndY() {
+		return (float)curve.getEndY();
+	}
+	public float getSpeculativeStartX() {
+		return startPosition.data[0];
+	}
+	public float getSpeculativeStartY() {
+		return startPosition.data[1];
+	}
+	public float getSpeculativeEndX() {
+		return endPosition.data[0];
+	}
+	public float getSpeculativeEndY() {
+		return endPosition.data[1];
+	}
+	private boolean speculativeStateReady = false;
+	public void speculateEnd(float x, float y) {
+		endPosition.data[0] = x;
+		endPosition.data[1] = y;
+		speculativeStateReady = true;
+	}
+	public void speculateStart(float x, float y) {
+		startPosition.data[0] = x;
+		startPosition.data[1] = y;
+		speculativeStateReady = true;
+	}
+	public void exportSpeculativeState(List<KeyValue> kvs) {
+		if(speculativeStateReady) {
+			kvs.add(new KeyValue(curve.startXProperty(), getSpeculativeStartX()));
+			kvs.add(new KeyValue(curve.startYProperty(), getSpeculativeStartY()));
+			kvs.add(new KeyValue(curve.endXProperty(), getSpeculativeEndX()));
+			kvs.add(new KeyValue(curve.endYProperty(), getSpeculativeEndY()));
+			kvs.add(new KeyValue(curve.controlX1Property(), (getSpeculativeStartX() + getSpeculativeEndX()) / 2.0f));
+			kvs.add(new KeyValue(curve.controlX2Property(), (getSpeculativeStartX() + getSpeculativeEndX()) / 2.0f));
+			kvs.add(new KeyValue(curve.controlY1Property(), getSpeculativeStartY()));
+			kvs.add(new KeyValue(curve.controlY2Property(), getSpeculativeEndY()));	
+		}
+		speculativeStateReady = false;
 	}
 }

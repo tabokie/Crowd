@@ -2,6 +2,8 @@ package crowd;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -18,39 +20,63 @@ import java.util.*;
 // distributed replication using round visualization
 
 public class Main extends Application {
+  Pane pane = null;
+  Pane contentPane = null;
+  WorkFlow flow = null;
+  private void handleCommand(String command) {
+    if(command != null && !command.isEmpty() && flow != null) {
+      String[] tokens = command.split(" ");
+      if(tokens[0].equals("gclaim")) { // group name ...
+        flow.claimGroup(tokens[1], Arrays.copyOfRange(tokens, 2, tokens.length));
+      }
+      else if(tokens[0].equals("nclaim")) {
+        flow.claimNode(tokens[1], tokens[2]); // node name group
+      }
+      else if(tokens[0].equals("glink")) {
+        flow.connectGroup(tokens[1], tokens[2]);
+      }
+      else if(tokens[0].equals("nlink")) {
+        flow.connectNode(tokens[1], tokens[2]);
+      }
+      else if(tokens[0].equals("clear")) {
+        contentPane.getChildren().clear();
+        flow = new WorkFlow(contentPane, new Vec2f(0,0), new Vec2f(800,400));
+      }
+      else if(tokens[0].equals("check")) {
+        flow.report();
+      }
+    }
+    return ;
+  }
+
   public void start(Stage primaryStage) {
-    Pane pane = new Pane();
+    pane = new Pane();
+    contentPane = new Pane();
 
-
-    WorkFlow flow = new WorkFlow(pane, new Vec2f(0, 0), new Vec2f(800, 400));
-    flow.setup("leader", null);
-    flow.setup("follower1", new String[]{"leader"});
-    flow.setup("follower2", new String[]{"leader"});
+    flow = new WorkFlow(contentPane, new Vec2f(0, 0), new Vec2f(800, 400));
+    flow.claimGroup("leader", null);
+    flow.claimGroup("follower1", new String[]{"leader"});
+    flow.claimGroup("follower2", new String[]{"leader"});
 
     Button submit = new Button("submit");
     submit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
     TextField textField = new TextField();
+    textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        if(event.getCode() == KeyCode.ENTER) {
+          handleCommand(textField.getText());
+        }
+      }
+    });
+    pane.getChildren().add(contentPane);
     HBox box = new HBox();
     box.getChildren().addAll(submit, textField);
     box.setSpacing(10);
     submit.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        if(textField.getText() != null && !textField.getText().isEmpty() ) {
-          String[] tokens = textField.getText().split(" ");
-          if(tokens[0].equals("group")) { // group name ...
-            flow.setup(tokens[1], Arrays.copyOfRange(tokens, 2, tokens.length));
-          }
-          else if(tokens[0].equals("node")) {
-            flow.claim(tokens[1], tokens[2]); // node name group
-          }
-          else if(tokens[0].equals("glink")) {
-            flow.connectGroup(tokens[1], tokens[2]);
-          }
-          else if(tokens[0].equals("nlink")) {
-            flow.connectNode(tokens[1], tokens[2]);
-          }
-        }
+        handleCommand(textField.getText());
       }
     });
     pane.getChildren().add(box);
