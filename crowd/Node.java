@@ -54,7 +54,7 @@ public class Node {
 			for(NodeLink link: from) {
 				link.speculateEnd(x, y, parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 			}
-			for(NodeLink link: from) {
+			for(NodeLink link: to) {
 				link.speculateStart(x, y, parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 			}
 			speculativeStateReady = true;
@@ -70,7 +70,7 @@ public class Node {
 		for(NodeLink link: from) {
 			link.exportSpeculativeState(appendList);
 		}
-		for(NodeLink link: from) {
+		for(NodeLink link: to) {
 			link.exportSpeculativeState(appendList);
 		}
 		speculativeStateReady = false;

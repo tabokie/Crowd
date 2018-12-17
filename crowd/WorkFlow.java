@@ -145,32 +145,37 @@ public class WorkFlow {
 		group.setLevel(min);
 		return ;
 	}
+	final private float minMarginOfWidth = 0.07f;
+	final private float minHeaderOfWidth = 0.05f;
 	private void updateLayout() {
-		float x = origin.data[0] + canvas.data[0] / flow.size() / 2.0f;
-		float w = canvas.data[0] * (1.0f - 1.0f / flow.size());
-		float y = origin.data[1] + canvas.data[1] * 0.1f;
-		float h = canvas.data[1] * 0.8f;
-		boolean first = true;
-		int groupCount = groups.size();
+		if(groups.size() == 0) return ;
+		float margin = (canvas.data[0] / flow.size()) / 2.0f;
+		if(margin < minMarginOfWidth * canvas.data[0]) {
+			margin = minMarginOfWidth * canvas.data[0];
+		}
+		float interval = (canvas.data[0] - margin * 2) / (flow.size() - 1);
+		if(flow.size() == 1) interval = 0;
+		int maxHeight = 0;
+		for(List<GroupNode> li : flow) {
+			if(maxHeight < li.size()) maxHeight = li.size();
+		}
+		if(maxHeight == 0) return;
+		float header = (canvas.data[1] / maxHeight) / 2.0f;
+		if(header < minHeaderOfWidth * canvas.data[1]) {
+			header = minHeaderOfWidth * canvas.data[1];
+		}
+		float hinterval = (canvas.data[1] - header * 2) / (maxHeight - 1);
+		if(maxHeight == 1) hinterval = 0;
 		for(int i = 0; i < flow.size(); i++) {
 			List<GroupNode> cur = flow.get(i);
-			float delta = h / (float)cur.size(); 
-			int j = 0;
+			float x = origin.data[0] + margin + interval * i;
+			float y = origin.data[1] + (canvas.data[1] - hinterval * cur.size() + hinterval) / 2.0f;
+			System.out.println("level " + String.valueOf(i) + ": " + String.valueOf(x) + ", " + String.valueOf(y));
 			for(GroupNode node: cur) {
 				node.setLevel(i);
-				node.speculateCenter(x, y + delta*0.5f + delta * j);
-				j ++;
+				node.speculateCenter(x, y);
+				y += hinterval;
 			}
-			List<GroupNode> next = null;
-			if(i+1 < flow.size()) next = flow.get(i+1);
-			else break;
-			if(first) {
-				x += (cur.size() / (float)groupCount + next.size() / (float)groupCount / 2.0f) * w;
-			}
-			else{
-				x += (cur.size() / (float)groupCount / 2.0f + next.size() / (float)groupCount / 2.0f) * w;
-			}
-			if(first)first = false;
 		}
 	}
 }

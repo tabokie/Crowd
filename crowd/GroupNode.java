@@ -64,6 +64,8 @@ public class GroupNode {
 		GroupNode ret = new GroupNode();
 		ret.pane = null;
 		ret.id = "dummy";
+		ret.vcenter.setCenterX(-1);
+		ret.vcenter.setCenterY(-1);
 		return ret;
 	}
 	public void setLevel(int l){
@@ -160,6 +162,8 @@ public class GroupNode {
 	}
 	private boolean speculativeStateReady = false;
 	public void speculateCenter(float x, float y) {
+		position.data[0] = x; // need to put in front
+		position.data[1] = y;
 		speculateLinks();
 		speculateNodes();
 		if(getCenterX() < 0) {
@@ -169,8 +173,7 @@ public class GroupNode {
 		else {
 			speculativeStateReady = true;
 		}
-		position.data[0] = x;
-		position.data[1] = y;
+		
 	}
 	public void exportSpeculativeState(List<KeyValue> kvs) {
 		if(speculativeStateReady) {
