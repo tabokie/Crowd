@@ -19,7 +19,7 @@ import java.util.*;
 // 2-dimentional workflow
 // distributed replication using round visualization
 
-public class Main extends Application {
+public class Monitor extends Application {
   Pane pane = null;
   Pane contentPane = null;
   WorkFlow flow = null;

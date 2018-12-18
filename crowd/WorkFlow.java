@@ -41,12 +41,12 @@ public class WorkFlow {
 		group = new GroupNode(pane, newGroup);
 		groups.put(newGroup, group);
 		insertGroup(group, precedentGroup);
-		updateLayout();
 		if(precedentGroup != null) {
 			for(int i = 0; i < precedentGroup.length; i++) {
 				connectGroup(groups.get(precedentGroup[i]), group);
 			}
 		}
+		updateLayout();
 		nextFrame(2000);
 		return null;
 	}

@@ -29,8 +29,10 @@ public class Halo {
     halo.setStrokeWidth(0);
 
     pane = p;
-    pane.getChildren().add(progress);
-    pane.getChildren().add(halo);
+    if(pane != null) {
+	    pane.getChildren().add(progress);
+	    pane.getChildren().add(halo);	
+    }
 	}
 
 	public void speculateProgress(float percentage) {

@@ -72,6 +72,7 @@ public class GroupNode {
 		ret.id = "dummy";
 		ret.vcenter.setCenterX(-1);
 		ret.vcenter.setCenterY(-1);
+		ret.halo = new Halo(null);
 		return ret;
 	}
 	public void setLevel(int l){
@@ -150,7 +151,7 @@ public class GroupNode {
 		fromNode.toLink(link);
 		toNode.fromLink(link);
 	}
-	final float initialRadius = 30;
+	final float initialRadius = 10;
 	public void speculateNodes() {
 		float total = members.size();
 		float radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;

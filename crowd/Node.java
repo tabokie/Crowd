@@ -4,6 +4,7 @@ import javafx.scene.shape.*;
 import javafx.scene.layout.Pane;
 
 import javafx.animation.*;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.animation.KeyValue;
 
@@ -26,6 +27,8 @@ public class Node {
     self.setCenterY(-1);
     self.setRadiusX(2);
     self.setRadiusY(2);
+    self.setFill(Color.DARKORANGE);
+    self.setStrokeWidth(0);
     pane.getChildren().add(self);
 		parent.addMember(this);
 	}

@@ -15,13 +15,13 @@ public class NodeLink {
 	public Vec2f toPoint = new Vec2f();
 	public Vec2f centerPoint = new Vec2f();
 	private boolean speculativeStateReady = false;
-	private final static float initialStrokeWidth = 0.5f;
+	private final static float initialStrokeWidth = 0.4f;
 	NodeLink(Arc c) {
 		curve = c;
 	}
 	public static NodeLink NewLink(Pane pane) {
 		Arc curve = new Arc();
-    curve.setStroke(Color.BLACK); 
+    curve.setStroke(Color.DIMGRAY); 
     curve.setStrokeWidth(initialStrokeWidth); 
     curve.setFill(Color.TRANSPARENT);
     pane.getChildren().add(curve);
@@ -132,7 +132,6 @@ public class NodeLink {
 		c.setStartAngle(Math.toDegrees(start));
 		float length = (float)Math.atan(oldRadius / newRadius) * 2;
 		c.setLength(Math.toDegrees(length));
-		System.out.println(c.toString());
 	}
 	static public void solveNodeLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy, List<KeyValue> kvs) {
 		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
