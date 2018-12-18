@@ -15,13 +15,14 @@ public class NodeLink {
 	public Vec2f toPoint = new Vec2f();
 	public Vec2f centerPoint = new Vec2f();
 	private boolean speculativeStateReady = false;
+	private final static float initialStrokeWidth = 0.5f;
 	NodeLink(Arc c) {
 		curve = c;
 	}
 	public static NodeLink NewLink(Pane pane) {
 		Arc curve = new Arc();
     curve.setStroke(Color.BLACK); 
-    curve.setStrokeWidth(3); 
+    curve.setStrokeWidth(initialStrokeWidth); 
     curve.setFill(Color.TRANSPARENT);
     pane.getChildren().add(curve);
     return new NodeLink(curve);

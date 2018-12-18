@@ -20,6 +20,8 @@ public class GroupNode {
 	private Node center = null;
 	// as member of GroupNode
 	private Ellipse vcenter = new Ellipse();
+	// public Ellipse halo = new Ellipse();
+	public Halo halo ;
 	private List<GroupLink> from = new ArrayList<GroupLink>();
 	private List<GroupLink> to = new ArrayList<GroupLink>();
 	private Pane pane;
@@ -34,10 +36,12 @@ public class GroupNode {
     vcenter.setCenterY(position.data[1]);
     vcenter.setRadiusX(3);
     vcenter.setRadiusY(3);
-    vcenter.setFill(Color.WHITE);
+    vcenter.setFill(Color.TRANSPARENT);
     vcenter.setStrokeWidth(1);
     vcenter.setStroke(Color.RED);
+
     pane.getChildren().add(vcenter);
+    halo = new Halo(pane);
 	}
 	GroupNode(Pane pa, String name) {
 		pane = pa;
@@ -46,10 +50,12 @@ public class GroupNode {
     vcenter.setCenterY(-1);
     vcenter.setRadiusX(3);
     vcenter.setRadiusY(3);
-    vcenter.setFill(Color.WHITE);
+    vcenter.setFill(Color.TRANSPARENT);
     vcenter.setStrokeWidth(1);
     vcenter.setStroke(Color.RED);
+
     pane.getChildren().add(vcenter);
+    halo = new Halo(pane);
 	}
 	GroupNode() { }
 	public String toString() {
@@ -88,6 +94,22 @@ public class GroupNode {
 	}
 	public float getCenterY() {
 		return (float)vcenter.getCenterY();
+	}
+	public GroupLink getOut(String id) {
+		for(GroupLink out : to ) {
+			if(out.toGroup.equals(id)) {
+				return out;
+			}
+		}
+		return null;
+	}
+	public GroupLink getIn(String id) {
+		for(GroupLink in : from ) {
+			if(in.fromGroup.equals(id)) {
+				return in;
+			}
+		}
+		return null;
 	}
 	public void fromLink(GroupLink link) {
 		link.toGroup = (id);
@@ -169,8 +191,11 @@ public class GroupNode {
 		if(getCenterX() < 0) {
 			vcenter.setCenterX(x);
 			vcenter.setCenterY(y);
+			halo.setCenterX(x);
+			halo.setCenterY(y);
 		}
 		else {
+			halo.speculateCenter(x, y);
 			speculativeStateReady = true;
 		}
 		
@@ -179,6 +204,9 @@ public class GroupNode {
 		if(speculativeStateReady) {
 			kvs.add(new KeyValue(vcenter.centerXProperty(), getSpeculativeCenterX()));
 			kvs.add(new KeyValue(vcenter.centerYProperty(), getSpeculativeCenterY()));
+			halo.exportSpeculativeState(kvs);
+			// kvs.add(new KeyValue(halo.centerXProperty(), getSpeculativeCenterX()));
+			// kvs.add(new KeyValue(halo.centerYProperty(), getSpeculativeCenterY()));
 		}
 		speculativeStateReady = false;
 		for(GroupLink link : from) {

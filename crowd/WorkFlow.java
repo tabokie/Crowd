@@ -7,9 +7,6 @@ import javafx.animation.KeyValue;
 import javafx.util.Duration;
 import java.util.*;
 
-// 1. out of bound
-// 2. node link disappear after transform
-// 3. glink initial control point too scary
 public class WorkFlow {
 	private List<List<GroupNode>> flow = new ArrayList<List<GroupNode>>();
 	private Map<String, Node> nodes = new HashMap<String, Node>();
@@ -17,6 +14,8 @@ public class WorkFlow {
 	private Vec2f origin = new Vec2f();
 	private Vec2f canvas = new Vec2f();
 	private Pane pane;
+	private final static float minMarginOfWidth = 0.07f;
+	private final static float minHeaderOfWidth = 0.05f;
 	WorkFlow(Pane p, Vec2f o, Vec2f size) {
 		pane = p;
 		origin.copy(o);
@@ -48,7 +47,7 @@ public class WorkFlow {
 				connectGroup(groups.get(precedentGroup[i]), group);
 			}
 		}
-		nextFrame();
+		nextFrame(2000);
 		return null;
 	}
 	public String claimNode(String nodeId, String groupIdentifier) {
@@ -58,14 +57,14 @@ public class WorkFlow {
 		if(node != null) return new String("find duplicated node named " + nodeId);
 		node = new Node(pane, group, nodeId);
 		nodes.put(nodeId, node);
-		nextFrame();
+		nextFrame(group, 2000);
 		return null;
 	}
 	public String connectGroup(String fromId, String toId) {
 		GroupNode fromNode = groups.get(fromId);
 		GroupNode toNode = groups.get(toId);
 		connectGroup(fromNode, toNode);
-		nextFrame();
+		nextFrame(2000);
 		return null;
 	}
 	public String connectNode(String fromId, String toId) {
@@ -74,25 +73,59 @@ public class WorkFlow {
 		if(fromNode == null || toNode == null ) return new String("can't find node to connect");
 		if(fromNode.getParent() == toNode.getParent() ) {
 			fromNode.getParent().connectNode(fromNode, toNode);
+			nextFrame(fromNode.getParent(), 2000);
 		}
 		else {
 			connectGroup(fromNode.getParent().getId(), toNode.getParent().getId());
+			nextFrame(2000);
 		}
-		nextFrame();
 		return null;
 	}
-	public void nextFrame() {
-		// updateLayout();
+	public String setStroke(String groupId, String target, float width) {
+		GroupNode groupNode = groups.get(groupId);
+		if(groupNode == null) return new String("can't find group named " + groupId);
+		GroupLink li = groupNode.getOut(target);
+		if(li == null) return new String("can't find route from " + groupId + " to " + target);
+		KeyValue kv = new KeyValue(li.curve.strokeWidthProperty(), width );
+		nextFrame(kv, 2000);
+		return null;
+	}
+	public String setHalo(String groupId, float radius, float progress) {
+		GroupNode groupNode = groups.get(groupId);
+		if(groupNode == null) return new String("can't find group named " + groupId);
+		// System.out.println("try to set halo of " + groupId + " with " + radius);
+		List<KeyValue> kvs = new ArrayList<KeyValue>();
+		groupNode.halo.speculateRadius(radius);
+		groupNode.halo.speculateProgress(progress);
+		groupNode.halo.exportSpeculativeState(kvs);
+		nextFrame(kvs, 2000);
+		return null;
+	}
+	private void nextFrame(List<KeyValue> kvs, float millis) {
 		final Timeline timeline =  new Timeline();
+		KeyFrame frame = new KeyFrame(Duration.millis(millis), "", null, kvs);
+		timeline.getKeyFrames().add(frame);
+		timeline.play();
+	}
+	private void nextFrame(KeyValue kv, float millis) {
+		final Timeline timeline =  new Timeline();
+		KeyFrame frame = new KeyFrame(Duration.millis(millis), kv);
+		timeline.getKeyFrames().add(frame);
+		timeline.play();
+	}
+	private void nextFrame(float millis) {
 		List<KeyValue> kvs = new ArrayList<KeyValue>();
 		for(List<GroupNode> list : flow) {
 			for(GroupNode group : list) {
 				group.exportSpeculativeState(kvs);
 			}
 		}
-		KeyFrame frame = new KeyFrame(Duration.millis(2000), "moveMe", null, kvs);
-		timeline.getKeyFrames().add(frame);
-		timeline.play();
+		nextFrame(kvs, millis);
+	}
+	private void nextFrame(GroupNode group, float millis) {
+		List<KeyValue> kvs = new ArrayList<KeyValue>();
+		group.exportSpeculativeState(kvs);
+		nextFrame(kvs, millis);
 	}
 	// 
 	private void connectGroup(GroupNode fromNode, GroupNode toNode) {
@@ -145,8 +178,7 @@ public class WorkFlow {
 		group.setLevel(min);
 		return ;
 	}
-	final private float minMarginOfWidth = 0.07f;
-	final private float minHeaderOfWidth = 0.05f;
+
 	private void updateLayout() {
 		if(groups.size() == 0) return ;
 		float margin = (canvas.data[0] / flow.size()) / 2.0f;
@@ -170,7 +202,6 @@ public class WorkFlow {
 			List<GroupNode> cur = flow.get(i);
 			float x = origin.data[0] + margin + interval * i;
 			float y = origin.data[1] + (canvas.data[1] - hinterval * cur.size() + hinterval) / 2.0f;
-			System.out.println("level " + String.valueOf(i) + ": " + String.valueOf(x) + ", " + String.valueOf(y));
 			for(GroupNode node: cur) {
 				node.setLevel(i);
 				node.speculateCenter(x, y);

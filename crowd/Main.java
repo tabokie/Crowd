@@ -45,6 +45,15 @@ public class Main extends Application {
       else if(tokens[0].equals("check")) {
         flow.report();
       }
+      else if(tokens[0].equals("gstr")) {
+        flow.setStroke(tokens[1], tokens[2], Float.parseFloat(tokens[3]));
+      }
+      else if(tokens[0].equals("ghal")) {
+        if(tokens.length >= 4) {
+          flow.setHalo(tokens[1], Float.parseFloat(tokens[2]), Float.parseFloat(tokens[3]));
+        }
+        // flow.setHalo(tokens[1], Float.parseFloat(tokens[2]));
+      }
     }
     return ;
   }

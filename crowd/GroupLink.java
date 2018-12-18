@@ -13,6 +13,7 @@ public class GroupLink {
 	private Vec2f startPosition = new Vec2f();
 	private Vec2f endPosition = new Vec2f();
 	public CubicCurve curve;
+	private final static float initialStrokeWidth = 0.5f;
 	GroupLink(CubicCurve c) {
 		curve = c;
 	}
@@ -26,7 +27,7 @@ public class GroupLink {
 	public static GroupLink NewLink(Pane pane) {
 		CubicCurve curve = new CubicCurve();
     curve.setStroke(Color.BLACK); 
-    curve.setStrokeWidth(3); 
+    curve.setStrokeWidth(initialStrokeWidth);
     curve.setFill(Color.TRANSPARENT);
     pane.getChildren().add(curve);
     return new GroupLink(curve);
