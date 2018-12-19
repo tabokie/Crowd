@@ -8,7 +8,7 @@ This project is currently under development.
 
 ## Crowd UI
 
-Mostly inspired by [Ambrose](https://github.com/twitter/ambrose), Crowd UI is implemented with JavaFX, and provides followering widget in a windows application:
+Mostly inspired by [Ambrose](https://github.com/twitter/ambrose), Crowd UI is implemented with JavaFX, and provides following widget in a windows application:
 
 * Workflow keeps track of overall working dependency between nodes and report the current progress.
 
