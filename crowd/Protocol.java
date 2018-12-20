@@ -1,7 +1,10 @@
 package crowd;
 
 public interface Protocol {
-	String parseNodeId(String message);
-	String parseGroupId(String message);
+	String makeMessage(String, String, String, String, String);
+	String parseFromNodeId(String message);
+	String parseFromGroupId(String message);
+	String parseToNodeId(String message);
+	String parseToGroupId(String message);
 	String parseMessage(String message);
 }

@@ -1,6 +1,7 @@
 package crowd;
 
 public interface Runner {
-	String respond(Simulator simulator, String message);
-	String report(Simulator simulator);
+	String report(Network network); // direct return serialized message
+	void respond(Network network,Protocol protocol, String message);
+	void online(Network network, Protocol protocol);
 }

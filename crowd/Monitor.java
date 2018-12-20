@@ -20,9 +20,9 @@ import java.util.*;
 // distributed replication using round visualization
 
 public class Monitor extends Application {
-  Pane pane = null;
-  Pane contentPane = null;
-  WorkFlow flow = null;
+  private Pane pane = null;
+  private Pane contentPane = null;
+  public WorkFlow flow = null;
   private void handleCommand(String command) {
     if(command != null && !command.isEmpty() && flow != null) {
       String[] tokens = command.split(" ");
@@ -57,7 +57,6 @@ public class Monitor extends Application {
     }
     return ;
   }
-
   public void start(Stage primaryStage) {
     pane = new Pane();
     contentPane = new Pane();
@@ -95,8 +94,11 @@ public class Monitor extends Application {
     primaryStage.setScene(scene);
     primaryStage.show();
   }
-  public static void main(String[] args) {
+  Monitor(String[] args) {
     launch(args);
+  }
+  public static void main(String[] args) {
+    Monitor monitor = new Monitor();
   }
 }
 
