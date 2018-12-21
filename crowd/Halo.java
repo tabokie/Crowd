@@ -9,7 +9,7 @@ import java.util.*;
 
 public class Halo {
 	private Arc progress = new Arc();
-	private Ellipse halo = new Ellipse();
+	private Circle halo = new Circle();
 	private Vec2f position = new Vec2f();
 	private float radius = 0;
 	private float progressPercent = 0;
@@ -24,8 +24,7 @@ public class Halo {
 		progress.setLength(0);
 
 		halo.setFill(Color.CORAL);
-		halo.setRadiusX(0);
-    halo.setRadiusY(0);
+		halo.setRadius(0);
     halo.setStrokeWidth(0);
 
     pane = p;
@@ -53,8 +52,7 @@ public class Halo {
 			kvs.add(new KeyValue(progress.lengthProperty(), progressPercent * 360));
 			kvs.add(new KeyValue(progress.radiusXProperty(), radius));
 			kvs.add(new KeyValue(progress.radiusYProperty(), radius));
-			kvs.add(new KeyValue(halo.radiusXProperty(), radius));
-			kvs.add(new KeyValue(halo.radiusYProperty(), radius));
+			kvs.add(new KeyValue(halo.radiusProperty(), radius));
 		}
 		if(positiionSpeculativeStateReady) {
 			kvs.add(new KeyValue(progress.centerXProperty(), position.data[0]));

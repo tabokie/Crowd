@@ -13,6 +13,7 @@ import javafx.geometry.*;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.layout.Background;
 
 import java.util.*;
 
@@ -60,6 +61,7 @@ public class Monitor extends Application {
 
   public void start(Stage primaryStage) {
     pane = new Pane();
+    pane.setBackground(Background.EMPTY);
     contentPane = new Pane();
 
     flow = new WorkFlow(contentPane, new Vec2f(0, 0), new Vec2f(800, 400));

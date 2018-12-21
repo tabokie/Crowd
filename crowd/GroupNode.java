@@ -19,8 +19,8 @@ public class GroupNode {
 	private Vec2f position = new Vec2f(-1, -1);
 	private Node center = null;
 	// as member of GroupNode
-	private Ellipse vcenter = new Ellipse();
-	// public Ellipse halo = new Ellipse();
+	private Circle vcenter = new Circle();
+	// public Circle halo = new Circle();
 	public Halo halo ;
 	private List<GroupLink> from = new ArrayList<GroupLink>();
 	private List<GroupLink> to = new ArrayList<GroupLink>();
@@ -34,8 +34,7 @@ public class GroupNode {
 		id = name;
     vcenter.setCenterX(position.data[0]);
     vcenter.setCenterY(position.data[1]);
-    vcenter.setRadiusX(3);
-    vcenter.setRadiusY(3);
+    vcenter.setRadius(3);
     vcenter.setFill(Color.TRANSPARENT);
     vcenter.setStrokeWidth(1);
     vcenter.setStroke(Color.RED);
@@ -48,8 +47,7 @@ public class GroupNode {
 		id = name;
     vcenter.setCenterX(-1);
     vcenter.setCenterY(-1);
-    vcenter.setRadiusX(3);
-    vcenter.setRadiusY(3);
+    vcenter.setRadius(3);
     vcenter.setFill(Color.TRANSPARENT);
     vcenter.setStrokeWidth(1);
     vcenter.setStroke(Color.RED);

@@ -12,7 +12,7 @@ import java.util.*;
 
 public class Node {
 	private Vec2f position = new Vec2f(-1, -1);
-	public Ellipse self = new Ellipse() ;
+	public Circle self = new Circle() ;
 	private GroupNode parent;
 	private Pane pane;
 	private String id;
@@ -25,8 +25,8 @@ public class Node {
 		id = name;
     self.setCenterX(-1);
     self.setCenterY(-1);
-    self.setRadiusX(2);
-    self.setRadiusY(2);
+    self.setRadius(2);
+    self.setRadius(2);
     self.setFill(Color.DARKORANGE);
     self.setStrokeWidth(0);
     pane.getChildren().add(self);

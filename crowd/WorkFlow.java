@@ -86,8 +86,10 @@ public class WorkFlow {
 		if(groupNode == null) return new String("can't find group named " + groupId);
 		GroupLink li = groupNode.getOut(target);
 		if(li == null) return new String("can't find route from " + groupId + " to " + target);
-		KeyValue kv = new KeyValue(li.curve.strokeWidthProperty(), width );
-		nextFrame(kv, 2000);
+		List<KeyValue> kvs = new ArrayList<KeyValue>();
+		kvs.add(new KeyValue(li.curve.strokeWidthProperty(), width ));
+		// kvs.add(new KeyValue(li.shade.radiusProperty(), 100));
+		nextFrame(kvs, 2000);
 		return null;
 	}
 	public String setHalo(String groupId, float radius, float progress) {
