@@ -138,7 +138,6 @@ public class WorkFlow {
 				flow.add(new ArrayList<GroupNode>());
 			}
 			flow.get(fromNode.getLevel() + 1).add(toNode);
-		updateLayout();
 		}
 		else if(fromNode.getLevel() > toNode.getLevel()) {
 			GroupNode tmp = fromNode;
@@ -192,16 +191,16 @@ public class WorkFlow {
 			if(maxHeight < li.size()) maxHeight = li.size();
 		}
 		if(maxHeight == 0) return;
-		float header = (canvas.data[1] / maxHeight) / 2.0f;
-		if(header < minHeaderOfWidth * canvas.data[1]) {
-			header = minHeaderOfWidth * canvas.data[1];
-		}
-		float hinterval = (canvas.data[1] - header * 2) / (maxHeight - 1);
-		if(maxHeight == 1) hinterval = 0;
+		// previously use uniform interval for every lane
+		// float header = (canvas.data[1] / maxHeight) / 2.0f; 
+		float header = minHeaderOfWidth * canvas.data[1];
 		for(int i = 0; i < flow.size(); i++) {
 			List<GroupNode> cur = flow.get(i);
+			float hinterval = (canvas.data[1] - header * 2) / cur.size();
+			if(cur.size() == 1) hinterval = canvas.data[1] - header * 2;
 			float x = origin.data[0] + margin + interval * i;
-			float y = origin.data[1] + (canvas.data[1] - hinterval * cur.size() + hinterval) / 2.0f;
+			// float y = origin.data[1] + (canvas.data[1] - hinterval * cur.size() + hinterval) / 2.0f;
+			float y = origin.data[1] + header + hinterval * 0.5f;
 			for(GroupNode node: cur) {
 				node.setLevel(i);
 				node.speculateCenter(x, y);

@@ -51,12 +51,14 @@ public class NodeLink {
 		float r = (float)curve.getRadiusX();
 		return y - (float)Math.sin(Math.toRadians(start)) * r;
 	}
+	private float timeToLive = -1;
 	public void setEnd(float x, float y, float cx, float cy) {
 		solveNodeLink(curve, getStartX(), getStartY(), x, y, cx, cy);
 		toPoint.data[0] = x;
 		toPoint.data[1] = y;
 		centerPoint.data[0] = cx;
 		centerPoint.data[1] = cy;
+		timeToLive = 2000;
 	}
 	public void setStart(float x, float y, float cx, float cy) {
 		solveNodeLink(curve, x, y, getEndX(), getEndY(), cx, cy);
@@ -64,6 +66,7 @@ public class NodeLink {
 		fromPoint.data[1] = y;
 		centerPoint.data[0] = cx;
 		centerPoint.data[1] = cy;
+		timeToLive = 2000;
 	}
 	public void speculateStart(float x, float y, float cx, float cy) {
 		fromPoint.data[0] = x;
@@ -104,6 +107,10 @@ public class NodeLink {
 				getSpeculativeEndX(), getSpeculativeEndY(), 
 				getSpeculativeCenterX(), getSpeculativeCenterY(),
 				kvs);	
+		}
+		if(timeToLive > 0) {
+			kvs.add(new KeyValue(curve.strokeWidthProperty(), 0));
+			timeToLive = -1;
 		}
 		speculativeStateReady = false;
 	}
