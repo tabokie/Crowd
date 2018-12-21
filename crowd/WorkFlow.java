@@ -89,6 +89,7 @@ public class WorkFlow {
 		List<KeyValue> kvs = new ArrayList<KeyValue>();
 		kvs.add(new KeyValue(li.curve.strokeWidthProperty(), width ));
 		// kvs.add(new KeyValue(li.shade.radiusProperty(), 100));
+		kvs.add(new KeyValue(li.ripple.progressProperty(), 1));
 		nextFrame(kvs, 2000);
 		return null;
 	}
