@@ -90,6 +90,22 @@ public class Node {
 		link.setStart(getCenterX(), getCenterY(), parent.getCenterX(), parent.getCenterY());
 		link.speculateStart(getSpeculativeCenterX(), getSpeculativeCenterY(), parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 	}
+	public NodeLink getOut(String id) {
+		for(NodeLink li : to) {
+			if(li.toNode.equals(id)){
+				return li;
+			}
+		}
+		return null;
+	}
+	public NodeLink getIn(String id) {
+		for(NodeLink li : from) {
+			if(li.fromNode.equals(id)){
+				return li;
+			}
+		}
+		return null;
+	}
 	public GroupNode getParent() {
 		return parent;
 	}

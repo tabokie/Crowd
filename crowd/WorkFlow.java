@@ -4,6 +4,7 @@ import javafx.scene.layout.Pane;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import java.util.*;
 
@@ -72,8 +73,20 @@ public class WorkFlow {
 		Node toNode = nodes.get(toId);
 		if(fromNode == null || toNode == null ) return new String("can't find node to connect");
 		if(fromNode.getParent() == toNode.getParent() ) {
-			fromNode.getParent().connectNode(fromNode, toNode);
-			nextFrame(fromNode.getParent(), 2000);
+			// fromNode.getParent().connectNode(fromNode, toNode);
+			// nextFrame(fromNode.getParent(), 2000);
+			NodeLink link = null;
+			List<KeyValue> kvs = new ArrayList<KeyValue>();
+			if((link = fromNode.getOut(toId)) != null) {
+				link.start(Color.GREEN, kvs);
+			}
+			else if((link = toNode.getOut(fromId)) != null) {
+				link.start(Color.RED, kvs);
+			}
+			else {
+				fromNode.getParent().connectNode(fromNode, toNode, kvs);
+			}
+			nextFrame(kvs, 2000);
 		}
 		else {
 			connectGroup(fromNode.getParent().getId(), toNode.getParent().getId());
@@ -88,8 +101,7 @@ public class WorkFlow {
 		if(li == null) return new String("can't find route from " + groupId + " to " + target);
 		List<KeyValue> kvs = new ArrayList<KeyValue>();
 		kvs.add(new KeyValue(li.curve.strokeWidthProperty(), width ));
-		// kvs.add(new KeyValue(li.shade.radiusProperty(), 100));
-		kvs.add(new KeyValue(li.ripple.progressProperty(), 1));
+		li.ripple.start(kvs);
 		nextFrame(kvs, 2000);
 		return null;
 	}
@@ -103,6 +115,11 @@ public class WorkFlow {
 		groupNode.halo.exportSpeculativeState(kvs);
 		nextFrame(kvs, 2000);
 		return null;
+	}
+	private void nextFrame(KeyFrame frame, float millis) {
+		final Timeline timeline =  new Timeline();
+		timeline.getKeyFrames().add(frame);
+		timeline.play();
 	}
 	private void nextFrame(List<KeyValue> kvs, float millis) {
 		final Timeline timeline =  new Timeline();

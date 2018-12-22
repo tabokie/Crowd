@@ -18,11 +18,11 @@ public class AnimatedRadialGradient {
 	// private DoubleProperty widthProperty = new SimpleDoubleProperty();
 	private double x = 0, y = 0;
 	private double radius = 0;
-	// private Color color;
+	private Color color;
 	// default color as black
-	AnimatedRadialGradient(Shape target) {
+	AnimatedRadialGradient(Shape target, Color color) {
 		this.target = target;
-		// this.color = color;
+		this.color = color;
 		// this.x = x;
 		// this.y = y;
 		radiusProperty.addListener(new ChangeListener(){
@@ -46,7 +46,7 @@ public class AnimatedRadialGradient {
 	}
 	private void updateFill() {
 		target.setFill(new RadialGradient(0, 0, getCenterX(), getCenterY(), getRadius(), false,
-			CycleMethod.NO_CYCLE, new Stop(0.8, Color.TRANSPARENT), new Stop(1, Color.BLACK)));
+			CycleMethod.NO_CYCLE, new Stop(0.8, Color.TRANSPARENT), new Stop(1, color)));
 		return ;
 	}
 	public void setRadius(double r) {
@@ -78,5 +78,8 @@ public class AnimatedRadialGradient {
 	}
 	public DoubleProperty centerYProperty() {
 		return centerYProperty;
+	}
+	public void setColor(Color c) {
+		color = c;
 	}
 }

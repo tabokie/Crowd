@@ -3,6 +3,10 @@ package crowd;
 import javafx.scene.shape.*;
 import javafx.beans.property.*;
 import javafx.beans.value.*;
+import javafx.animation.KeyValue;
+import java.util.*;
+import javafx.scene.paint.Color;
+
 // Ripple must be attach to a designated path 
 // which is already included in the context
 public class Ripple {
@@ -19,7 +23,7 @@ public class Ripple {
 		// the path is managed by ripple now
 		mask = new Circle();
 		mask.setRadius(0);
-		gradient = new AnimatedRadialGradient(mask);
+		gradient = new AnimatedRadialGradient(mask, Color.RED);
 		startX = path.startXProperty();
 		startY = path.startYProperty();
 		endX = path.endXProperty();
@@ -64,6 +68,10 @@ public class Ripple {
 		});
 		path.setClip(mask);
 
+	}
+	public void start(List<KeyValue> kvs) {
+		progress.setValue(0);
+		kvs.add(new KeyValue(progress, 2));
 	}
 	public void setProgress(double p) {
 		progress.setValue(p);

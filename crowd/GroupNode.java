@@ -128,7 +128,7 @@ public class GroupNode {
 			speculateNodes();
 		}
 	}
-	public void connectNode(Node a, Node b) { // from little end to higher end
+	public void connectNode(Node a, Node b, List<KeyValue> kvs) { // from little end to higher end
 		if(pane == null) return ;
 		Node fromNode = null;
 		Node toNode = null;
@@ -148,6 +148,12 @@ public class GroupNode {
 		NodeLink link = NodeLink.NewLink(pane);
 		fromNode.toLink(link);
 		toNode.fromLink(link);
+		if(a == fromNode) {
+			link.start(Color.GREEN, kvs);
+		}
+		else {
+			link.start(Color.RED, kvs);
+		}
 	}
 	final float initialRadius = 10;
 	public void speculateNodes() {

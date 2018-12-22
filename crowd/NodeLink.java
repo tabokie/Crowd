@@ -21,8 +21,9 @@ public class NodeLink {
 	}
 	public static NodeLink NewLink(Pane pane) {
 		Arc curve = new Arc();
-    curve.setStroke(Color.DIMGRAY); 
-    curve.setStrokeWidth(initialStrokeWidth); 
+    // curve.setStroke(Color.DIMGRAY); 
+    // curve.setStrokeWidth(initialStrokeWidth); 
+    curve.setStrokeWidth(0);
     curve.setFill(Color.TRANSPARENT);
     pane.getChildren().add(curve);
     return new NodeLink(curve);
@@ -108,11 +109,25 @@ public class NodeLink {
 				getSpeculativeCenterX(), getSpeculativeCenterY(),
 				kvs);	
 		}
-		if(timeToLive > 0) {
-			kvs.add(new KeyValue(curve.strokeWidthProperty(), 0));
-			timeToLive = -1;
+		// if(timeToLive > 0) {
+		// 	kvs.add(new KeyValue(curve.strokeWidthProperty(), 0));
+		// 	timeToLive = -1;
+		// }
+		speculativeStateReady = false;
+	}
+	public void start(Color color, List<KeyValue> kvs) {
+		if(speculativeStateReady){ // fix position
+			solveNodeLink(curve, 
+				getSpeculativeStartX(), getSpeculativeStartY(), 
+				getSpeculativeEndX(), getSpeculativeEndY(), 
+				getSpeculativeCenterX(), getSpeculativeCenterY(),
+				kvs);	
 		}
 		speculativeStateReady = false;
+		// reset stroke
+		curve.setStrokeWidth(initialStrokeWidth);
+		curve.setStroke(color);
+		kvs.add(new KeyValue(curve.strokeWidthProperty(), 0));
 	}
 	static public void solveNodeLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy) { // clockwise ?
 		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
