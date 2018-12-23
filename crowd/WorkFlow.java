@@ -34,53 +34,56 @@ public class WorkFlow {
 		return ;
 	}
 	// public interface will update layout at the end
-	public String claimGroup(String newGroup, String[] precedentGroup) {
-		GroupNode group = groups.get(newGroup);
+	public String newGroup(String name) {
+		return newGroup(name, null);
+	}
+	public String newGroup(String name, String[] requisite) {
+		GroupNode group = groups.get(name);
 		if(group != null) {
-			return new String("find duplicated group named " + newGroup);
+			return new String("find duplicated group named " + name);
 		}
-		group = new GroupNode(pane, newGroup);
-		groups.put(newGroup, group);
-		insertGroup(group, precedentGroup);
-		if(precedentGroup != null) {
-			for(int i = 0; i < precedentGroup.length; i++) {
-				connectGroup(groups.get(precedentGroup[i]), group);
+		group = new GroupNode(pane, name);
+		groups.put(name, group);
+		insertGroup(group, requisite);
+		if(requisite != null) {
+			for(int i = 0; i < requisite.length; i++) {
+				precedeGroup(group, groups.get(requisite[i]));
 			}
 		}
 		updateLayout();
 		nextFrame(2000);
 		return null;
 	}
-	public String claimNode(String nodeId, String groupIdentifier) {
-		GroupNode group = groups.get(groupIdentifier);
-		if(group == null) return new String("can't find group named " + groupIdentifier );
-		Node node = nodes.get(nodeId);
-		if(node != null) return new String("find duplicated node named " + nodeId);
-		node = new Node(pane, group, nodeId);
-		nodes.put(nodeId, node);
+	public String newNode(String name, String belongToGroup) {
+		GroupNode group = groups.get(belongToGroup);
+		if(group == null) return new String("can't find group named " + belongToGroup );
+		Node node = nodes.get(name);
+		if(node != null) return new String("find duplicated node named " + name);
+		node = new Node(pane, group, name);
+		nodes.put(name, node);
 		nextFrame(group, 2000);
 		return null;
 	}
-	public String connectGroup(String fromId, String toId) {
-		GroupNode fromNode = groups.get(fromId);
-		GroupNode toNode = groups.get(toId);
-		connectGroup(fromNode, toNode);
+	public String precedeGroup(String fromName, String toName) {
+		GroupNode fromNode = groups.get(fromName);
+		GroupNode toNode = groups.get(toName);
+		precedeGroup(fromNode, toNode);
 		nextFrame(2000);
 		return null;
 	}
-	public String connectNode(String fromId, String toId) {
-		Node fromNode = nodes.get(fromId);
-		Node toNode = nodes.get(toId);
+	public String connectNode(String fromName, String toName) {
+		Node fromNode = nodes.get(fromName);
+		Node toNode = nodes.get(toName);
 		if(fromNode == null || toNode == null ) return new String("can't find node to connect");
 		if(fromNode.getParent() == toNode.getParent() ) {
 			// fromNode.getParent().connectNode(fromNode, toNode);
 			// nextFrame(fromNode.getParent(), 2000);
 			NodeLink link = null;
 			List<KeyValue> kvs = new ArrayList<KeyValue>();
-			if((link = fromNode.getOut(toId)) != null) {
+			if((link = fromNode.getOut(toName)) != null) {
 				link.start(Color.GREEN, kvs);
 			}
-			else if((link = toNode.getOut(fromId)) != null) {
+			else if((link = toNode.getOut(fromName)) != null) {
 				link.start(Color.RED, kvs);
 			}
 			else {
@@ -89,7 +92,7 @@ public class WorkFlow {
 			nextFrame(kvs, 2000);
 		}
 		else {
-			connectGroup(fromNode.getParent().getId(), toNode.getParent().getId());
+			precedeGroup(fromNode.getParent().getId(), toNode.getParent().getId());
 			nextFrame(2000);
 		}
 		return null;
@@ -100,8 +103,9 @@ public class WorkFlow {
 		GroupLink li = groupNode.getOut(target);
 		if(li == null) return new String("can't find route from " + groupId + " to " + target);
 		List<KeyValue> kvs = new ArrayList<KeyValue>();
-		kvs.add(new KeyValue(li.curve.strokeWidthProperty(), width ));
-		li.ripple.start(kvs);
+		// kvs.add(new KeyValue(li.curve.strokeWidthProperty(), width ));
+		// li.ripple.start(kvs);
+		li.curve.startRipple(kvs);
 		nextFrame(kvs, 2000);
 		return null;
 	}
@@ -147,8 +151,7 @@ public class WorkFlow {
 		group.exportSpeculativeState(kvs);
 		nextFrame(kvs, millis);
 	}
-	// 
-	private void connectGroup(GroupNode fromNode, GroupNode toNode) {
+	private void precedeGroup(GroupNode fromNode, GroupNode toNode) {
 		if(fromNode == null || toNode == null) return;  
 		if(fromNode.getLevel() == toNode.getLevel()) { // remove to
 			List<GroupNode> curLevel = flow.get(fromNode.getLevel());
@@ -178,8 +181,6 @@ public class WorkFlow {
 		fromNode.toLink(link);
 		toNode.fromLink(link);
 	}
-
-
 	private void insertGroup(GroupNode group, String[] precedentGroup) {
 		int min = 0;
 		if(precedentGroup != null) {

@@ -29,33 +29,28 @@ public class GroupNode {
 	private int level = 0;
 
 	GroupNode(Pane pa, String name, Vec2f p) {
-		position.copy(p);
 		pane = pa;
 		id = name;
-    vcenter.setCenterX(position.data[0]);
-    vcenter.setCenterY(position.data[1]);
-    vcenter.setRadius(3);
-    vcenter.setFill(Color.TRANSPARENT);
-    vcenter.setStrokeWidth(1);
-    vcenter.setStroke(Color.RED);
-
+    configureCenter(vcenter);
+    setCenter(p.data[0], p.data[1]);
     pane.getChildren().add(vcenter);
     halo = new Halo(pane);
 	}
 	GroupNode(Pane pa, String name) {
 		pane = pa;
 		id = name;
-    vcenter.setCenterX(-1);
-    vcenter.setCenterY(-1);
-    vcenter.setRadius(3);
-    vcenter.setFill(Color.TRANSPARENT);
-    vcenter.setStrokeWidth(1);
-    vcenter.setStroke(Color.RED);
-
+    configureCenter(vcenter);
     pane.getChildren().add(vcenter);
     halo = new Halo(pane);
 	}
 	GroupNode() { }
+	private static void configureCenter(Circle center) {
+		center.setCenterX(-1);
+		center.setCenterY(-1);
+		center.setRadius(1);
+		center.setFill(Color.BLACK);
+		center.setStrokeWidth(0);
+	}
 	public String toString() {
 		String ret = new String(id + ": (" + String.valueOf(getCenterX()) + ", " + String.valueOf(getCenterY())
 			+ ") -> ");
@@ -186,6 +181,15 @@ public class GroupNode {
 				link.speculateStart(x, y);
 			}
 		}
+	}
+	public void setCenter(float x, float y) {
+		vcenter.setCenterX(x);
+		vcenter.setCenterY(y);
+		halo.setCenterX(x);
+		halo.setCenterY(y);
+		position.data[0] = x;
+		position.data[1] = y;
+		speculativeStateReady = false;
 	}
 	private boolean speculativeStateReady = false;
 	public void speculateCenter(float x, float y) {

@@ -28,13 +28,13 @@ public class Monitor extends Application {
     if(command != null && !command.isEmpty() && flow != null) {
       String[] tokens = command.split(" ");
       if(tokens[0].equals("gclaim")) { // group name ...
-        flow.claimGroup(tokens[1], Arrays.copyOfRange(tokens, 2, tokens.length));
+        flow.newGroup(tokens[1], Arrays.copyOfRange(tokens, 2, tokens.length));
       }
       else if(tokens[0].equals("nclaim")) {
-        flow.claimNode(tokens[1], tokens[2]); // node name group
+        flow.newNode(tokens[1], tokens[2]); // node name group
       }
       else if(tokens[0].equals("glink")) {
-        flow.connectGroup(tokens[1], tokens[2]);
+        flow.precedeGroup(tokens[1], tokens[2]);
       }
       else if(tokens[0].equals("nlink")) {
         flow.connectNode(tokens[1], tokens[2]);
@@ -65,9 +65,9 @@ public class Monitor extends Application {
     contentPane = new Pane();
 
     flow = new WorkFlow(contentPane, new Vec2f(0, 0), new Vec2f(800, 400));
-    flow.claimGroup("leader", null);
-    flow.claimGroup("follower1", new String[]{"leader"});
-    flow.claimGroup("follower2", new String[]{"leader"});
+    flow.newGroup("leader");
+    flow.newGroup("follower1", new String[]{"leader"});
+    flow.newGroup("follower2", new String[]{"leader"});
 
     Button submit = new Button("submit");
     submit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
