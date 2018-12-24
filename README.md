@@ -22,6 +22,8 @@ Here is a screenshot of alpha version UI:
 
 Crowd deploy simulated nodes based on `Crowd Script`, which provide expressive way of designing custom distributed protocol.
 
+During runtime, script is dynamicly compiled and instantiated into new nodes. To constraint the simulation thread amount in a controllable limit, simulator employs a main scheduler thread that receives discrete time events and schedules them onto fixed amount of sub-thread workers. Both real-time and speculative simulation driver are for option when running.
+
 Once the monitor is launched, user can start predefined simulation task or create new node with Crowd Script dynamically.
 
 Currently support algorithm:
@@ -36,6 +38,10 @@ Apart from simulation on single machine, Crowd is designed to fit the needs of v
 Solutions include network communication, shared memory.
 
 ## Inspiration
+
+Concurrent data structure:
+
+* **[priority queue](./docs/concurrent-priority-queue-design.md)**: used for discrete event scheduling
 
 Distributed simulator project:
 

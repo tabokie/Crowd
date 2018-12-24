@@ -5,6 +5,8 @@ import javax.tools.ToolProvider;
 import java.lang.reflect.Method;
 import java.io.*;
 
+import crowd.concurrent.*;
+
 public class Test {
 	private JavaCompiler javaCompiler;
 	private void compile(String name) {
@@ -31,30 +33,46 @@ public class Test {
 	 		e.printStackTrace();
 	 	}
 	}
-	Test() {
+	Test(boolean a) {
 		javaCompiler = ToolProvider.getSystemJavaCompiler();
 		if(javaCompiler == null) {
 			System.out.println("Can't find system javac");
 			System.out.println("Probable solution: copy `tools.lib` from jdk directory to `" + System.getProperty("java.home") + "\\lib`");
 		}
 	}
-	public static void main(String[] args) {
-		Test testInstance = new Test();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+	Test(int a) {
+		ConcurrentPriorityQueue<Integer> queue = new ConcurrentPriorityQueue<Integer>();
+		queue.insert(7);
+		queue.insert(3);
+		queue.insert(139);
+		queue.insert(3);
+		queue.insert(0);
+		queue.insert(90);
 		while(true) {
-			try {
-				String line = reader.readLine();
-				if(line.startsWith("exit")){
-					break;
-				}
-				else {
-					testInstance.compile(line);
-				}	
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-				break;
-			}
+			Integer ret = queue.deleteMin();
+			if(ret == null) break;
+			System.out.println("retrieve: " + ret.toString());
 		}
+	}
+	public static void main(String[] args) {
+		Test testInstance = new Test(1);
+
+
+		// BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		// while(true) {
+		// 	try {
+		// 		String line = reader.readLine();
+		// 		if(line.startsWith("exit")){
+		// 			break;
+		// 		}
+		// 		else {
+		// 			testInstance.compile(line);
+		// 		}	
+		// 	}
+		// 	catch(Exception e) {
+		// 		e.printStackTrace();
+		// 		break;
+		// 	}
+		// }
 	}
 }
