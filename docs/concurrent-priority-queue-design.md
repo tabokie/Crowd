@@ -2,7 +2,7 @@
 
 Here is a list of popular concurrent priority queue implementations. Complete set of papers can be found at `./pdf`.
 
-## Skiplist-Based Concurrent Priority Queues, 2000 ([pdf](./pdf/2000.Skiplist-Based Concurrent Priority Queues.pdf))
+## Skiplist-Based Concurrent Priority Queues, 2000 ([pdf](./pdf/2000.Skiplist-Based_Concurrent_Priority_Queues.pdf))
 
 * Insert
 
@@ -30,4 +30,3 @@ while let Node{up: upNode, right: rightNode, level: curLevel} = node{
 	node.pointRight(pri); // make sure current reader can go back to track
 }
 ```
-
