@@ -146,12 +146,13 @@ public class DecoupledAtomicMarkableReference<V> {
 	/**
 	 * New method introduced to set reference alone, unconditionally
 	 */
-	public boolean getAndMark(boolean newMark) {
+	public V getAndMark(boolean newMark, boolean[] ret) {
 		Pair<V> current;
 		do {
 			current = pair.get();
 		} while(current.mark != newMark && !casPair(current, Pair.of(current.reference, newMark)));
-		return current.mark;
+		ret[0] = current.mark;
+		return current.reference;
 	}
 	public boolean compareAndSet(V expectedReference, V newReference) {
 		Pair<V> current = pair.get();

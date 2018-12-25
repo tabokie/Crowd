@@ -48,7 +48,10 @@ public class Test {
 		queue.insert(3);
 		queue.insert(0);
 		queue.insert(90);
+		System.out.println(queue.toString());
 		while(true) {
+			Integer min = queue.readMin();
+			if(min != null)System.out.println("Min: " + min.toString());
 			Integer ret = queue.deleteMin();
 			if(ret == null) break;
 			System.out.println("retrieve: " + ret.toString());

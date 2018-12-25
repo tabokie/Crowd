@@ -70,8 +70,11 @@ public class ConcurrentPriorityQueue<E> {
 				((AtomicReference<Node<E>>)otherNext[level - 1]).set(next);
 			}
 		}
-		public boolean getAndDeleteNext() {
-			return firstNext.getAndMark(true);
+		public Node<E> getAndDeleteNext(boolean[] ret) {
+			return firstNext.getAndMark(true, ret);
+		}
+		public Node<E> get(boolean[] ret) {
+			return firstNext.get(ret);
 		}
 		public boolean compareAndSet(Node<E> expNext, boolean expD, Node<E> next, boolean d) {
 			return firstNext.compareAndSet(expNext, next, expD, d);
@@ -98,12 +101,13 @@ public class ConcurrentPriorityQueue<E> {
 	private final int MAX_LEVEL = 16;
 	private int nlevels = MAX_LEVEL;
 	private Node<E> head = new Node<E>(MAX_LEVEL);
-	public E deleteMin() {
+	public E readMin() {
 		Node<E> x = head, newhead = null, obshead = head.next(0);
 		int offset = 0;
-		boolean deleteFlag = true;
+		boolean[] deleteFlag = new boolean[1];
+		deleteFlag[0] = true;
 		Node<E> nxt;
-		while(deleteFlag) {
+		while(deleteFlag[0]) {
 			nxt = x.next(0);
 			if(nxt == null) {
 				return null; // already empty
@@ -111,8 +115,28 @@ public class ConcurrentPriorityQueue<E> {
 			if(x.inserting() && newhead == null) {
 				newhead = x;
 			}
-			deleteFlag = x.getAndDeleteNext();
-			nxt = x.next(0); // shouldn't change after getAndDelete
+			nxt = x.get(deleteFlag);
+			offset ++;
+			x = nxt;
+		}
+		return x.value;
+	}
+	public E deleteMin() {
+		Node<E> x = head, newhead = null, obshead = head.next(0);
+		int offset = 0;
+		boolean[] deleteFlag = new boolean[1];
+		deleteFlag[0] = true;
+		Node<E> nxt;
+		while(deleteFlag[0]) {
+			nxt = x.next(0);
+			if(nxt == null) {
+				return null; // already empty
+			}
+			if(x.inserting() && newhead == null) {
+				newhead = x;
+			}
+			nxt = x.getAndDeleteNext(deleteFlag);
+			// nxt = x.next(0); // shouldn't change after getAndDelete
 			offset ++;
 			x = nxt;
 		}
@@ -128,27 +152,40 @@ public class ConcurrentPriorityQueue<E> {
 		}
 		return v;
 	}
+	public String toString() {
+		String ret = "";
+		Node<E> cur = head.next(0);
+		while(cur != null) {
+			ret += ">" + cur.value.toString() + "-";
+			cur = cur.next(0);
+		}
+		ret += "<";
+		return ret;
+	}
 	public void insert(E value) {
 		int height = random();
 		Node<E> newNode = new Node<E>(value, height);
-		List<Node<E>> preds = new ArrayList<Node<E>>(), succs = new ArrayList<Node<E>>();
+		Object[] preds = new Object[height];
+		Object[] succs = new Object[height];
 		Node<E> del;
 		do {
 			del = locatePreds(value, preds, succs);
-			newNode.next(0, succs.get(0));
-		}while(preds.get(0).compareAndSet(succs.get(0), false, newNode, false));
+			newNode.next(0, (Node<E>)succs[0]);
+		}while(!((Node<E>)preds[0]).compareAndSet((Node<E>)succs[0], false, newNode, false));
 		int i = 1;
 		while(i < height) {
-			newNode.next(i, succs.get(i));
-			if(newNode.deleted() || succs.get(i).deleted() || succs.get(i) == del) {
+			newNode.next(i, (Node<E>)succs[i]);
+			// no more successors
+			if(succs[i] == null) break;
+			if(newNode.deleted() || ((Node<E>)succs[i]).deleted() || (Node<E>)succs[i] == del) {
 				break;
 			}
-			if(preds.get(i).compareAndSet(i, succs.get(i), newNode)) {
+			if(((Node<E>)preds[i]).compareAndSet(i, (Node<E>)succs[i], newNode)) {
 				i ++;
 			}
 			else {
 				del = locatePreds(value, preds, succs);
-				if(succs.get(0) != newNode) break;
+				if((Node<E>)succs[0] != newNode) break;
 			}
 		}
 		newNode.setInserting(false);
@@ -173,21 +210,16 @@ public class ConcurrentPriorityQueue<E> {
 			}
 		}
 	}
-	private Node<E> locatePreds(E value, List<Node<E>> preds, List<Node<E>> succs) {
-		preds.clear();
-		succs.clear();
-		int i = nlevels - 1;
+	private Node<E> locatePreds(E value, Object[] preds, Object[] succs) {
+		int i = preds.length - 1;
 		Node<E> pred = head, del = null;
 		Node<E> cur;
 		boolean deleteFlag;
 		while(i >= 0) {
 			cur = pred.next(i);
-			if(cur == null) {
-				i --;
-				continue;
-			}
 			deleteFlag = pred.deleted();
-			while(((Comparable<E>)cur.value).compareTo(value) < 0 || cur.deleted() || (deleteFlag && i == 0)) {
+			while(cur != null && 
+				(((Comparable<E>)cur.value).compareTo(value) < 0 || cur.deleted() || (deleteFlag && i == 0))) {
 				if(deleteFlag && i == 0) {
 					del = cur;
 				}
@@ -195,8 +227,8 @@ public class ConcurrentPriorityQueue<E> {
 				cur = pred.next(i);
 				deleteFlag = pred.deleted();
 			}
-			preds.add(0, pred);
-			succs.add(0, cur);
+			preds[i] = pred;
+			succs[i] = cur;
 			i--;
 		}
 		return del;
