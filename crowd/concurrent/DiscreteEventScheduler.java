@@ -1,36 +1,71 @@
 package crowd.concurrent;
 
-public class DiscreteEventScheduler {
-	private ConcurrentPriorityQueue<Event> eventQueue = new ConcurrentPriorityQueue<Event>();
-	private double timestamp = 0;
+import java.util.concurrent.atomic.*;
+
+public class DiscreteEventScheduler extends Thread {
+	private ConcurrentPriorityQueue<Actor> actorQueue = new ConcurrentPriorityQueue<Actor>();
+	private int timestamp = 0;
 	private final int BUFFER_SIZE = 10;
-	private Event[] eventBuffer = new Event[BUFFER_SIZE];
+	private Actor[] actorBuffer = new Actor[BUFFER_SIZE];
 	private int size = 0;
-	public void serve() {
-		while(true) {
+	private AtomicBoolean closed = new AtomicBoolean(false);
+	public void enqueue(Actor e) {
+		actorQueue.insert(e);
+	}
+	public void put() {
+		System.out.println(actorQueue.toString());
+	}
+	public void close() {
+		closed.set(true);
+		try {
+			join();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@Override
+	public void run() {
+		while(!closed.get() || actorQueue.readMin() != null || findUnfinished() >= 0) {
 			// update buffer
-			double minThreshold = -1;
+			int minThreshold = -1;
+			int idx = -1;
 			for(int i = 0; i < size; i ++) {
-				if(minThreshold < 0 && minThreshold > eventBuffer[i].timestamp) minThreshold = eventBuffer[i].timestamp;
+				if(actorBuffer[i] == null) continue;
+				int t = actorBuffer[i].getThreshold();
+				if(t <= timestamp && actorBuffer[i].getFinished()) { // meaning local job all submitted 
+					actorBuffer[i] = null;
+					continue;
+				}
+				if(minThreshold < 0 || minThreshold > t) {
+					idx = i;
+					minThreshold = t;
+				}
 			}
-			if(minThreshold > 0)timestamp = minThreshold;
+			if(minThreshold > timestamp)timestamp = minThreshold;
 			while(true) {
-				Event event = eventQueue.readMin();
-				if(event.timestamp < timestamp) {
-					// event allowed to schedule
+				Actor actor = actorQueue.readMin();
+				if(actor != null && actor.timestamp <= timestamp) {
+					// actor allowed to schedule
 					int index = findEmpty();
 					if(index < 0) break;
-					event = eventQueue.deleteMin(); // at most previous time since no one can delete it
-					eventBuffer[index] = event;
-					event.start();
+					actor = actorQueue.deleteMin(); // at most previous time since no one can delete it
+					actorBuffer[index] = actor;
+					actor.start(this);
 				}
-				else break;
+				else break; // Actorual break after consume the queue
 			}
 		}
 	}
+	private int findUnfinished() {
+		for(int i = 0; i < size; i ++ ){
+			if(actorBuffer[i] != null) return i;
+		}
+		return  -1;
+	}
 	private int findEmpty() {
 		for(int i = 0; i < size; i ++ ){
-			if(eventBuffer[i] == null) return i;
+			if(actorBuffer[i] == null) return i;
 		}
 		if(size <= BUFFER_SIZE) { // expand
 			size ++;

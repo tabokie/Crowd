@@ -41,21 +41,28 @@ public class Test {
 		}
 	}
 	Test(int a) {
-		ConcurrentPriorityQueue<Integer> queue = new ConcurrentPriorityQueue<Integer>();
-		queue.insert(7);
-		queue.insert(3);
-		queue.insert(139);
-		queue.insert(3);
-		queue.insert(0);
-		queue.insert(90);
-		System.out.println(queue.toString());
-		while(true) {
-			Integer min = queue.readMin();
-			if(min != null)System.out.println("Min: " + min.toString());
-			Integer ret = queue.deleteMin();
-			if(ret == null) break;
-			System.out.println("retrieve: " + ret.toString());
-		}
+		DiscreteEventScheduler scheduler = new DiscreteEventScheduler();
+		scheduler.enqueue(new Actor(0, (Actor actor) -> {
+			System.out.println("A running");
+			actor.act(1, () -> {
+				System.out.println("A.1 done");
+			});
+			actor.act(2, () -> {
+				System.out.println("A.2 done");
+			});
+		}));
+		scheduler.enqueue(new Actor(0, (Actor actor) -> {
+			System.out.println("B running");
+			actor.act(1, () -> {
+				System.out.println("B.1 done");
+			});
+			actor.act(10, () -> {
+				System.out.println("B.10 done");
+			});
+		}));
+
+		scheduler.start();
+		scheduler.close();
 	}
 	public static void main(String[] args) {
 		Test testInstance = new Test(1);
