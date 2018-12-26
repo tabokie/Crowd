@@ -15,15 +15,15 @@ import javafx.animation.*;
 
 public class GroupNode {
 	// manager of nodes
-	private List<Node> members = new ArrayList<Node>();
+	private List<Node> members = new Vector<Node>();
 	private Vec2f position = new Vec2f(-1, -1);
 	private Node center = null;
 	// as member of GroupNode
 	private Circle vcenter = new Circle();
 	// public Circle halo = new Circle();
 	public Halo halo ;
-	private List<GroupLink> from = new ArrayList<GroupLink>();
-	private List<GroupLink> to = new ArrayList<GroupLink>();
+	private List<GroupLink> from = new Vector<GroupLink>();
+	private List<GroupLink> to = new Vector<GroupLink>();
 	private Pane pane;
 	private String id;
 	private int level = 0;

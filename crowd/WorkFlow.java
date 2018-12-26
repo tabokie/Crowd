@@ -10,8 +10,8 @@ import java.util.*;
 
 public class WorkFlow {
 	private List<List<GroupNode>> flow = new ArrayList<List<GroupNode>>();
-	private Map<String, Node> nodes = new HashMap<String, Node>();
-	private Map<String, GroupNode> groups = new HashMap<String, GroupNode>();
+	private Map<String, Node> nodes = new Hashtable<String, Node>(); // thread safe
+	private Map<String, GroupNode> groups = new Hashtable<String, GroupNode>();
 	private Vec2f origin = new Vec2f();
 	private Vec2f canvas = new Vec2f();
 	private Pane pane;
@@ -21,6 +21,22 @@ public class WorkFlow {
 		pane = p;
 		origin.copy(o);
 		canvas.copy(size);
+	}
+	public void startConcurrentTest(int baseSize) {
+		for(int i = 0; i < 100; i ++) {
+			final int tmp = i;
+			Thread work = new Thread(() -> {
+				this.newGroup("2." + String.valueOf(tmp), new String[]{"1." + String.valueOf(tmp % baseSize)});
+			});
+			work.start();
+		}
+		for(int i = 0; i < 100; i ++) {
+			final int tmp = i;
+			Thread work = new Thread(() -> {
+				this.newNode("n." + String.valueOf(tmp) , "2." + String.valueOf(tmp));
+			});
+			work.start();
+		}
 	}
 	public void report() {
 		int level = 1;
@@ -151,7 +167,7 @@ public class WorkFlow {
 		group.exportSpeculativeState(kvs);
 		nextFrame(kvs, millis);
 	}
-	private void precedeGroup(GroupNode fromNode, GroupNode toNode) {
+	private synchronized void precedeGroup(GroupNode fromNode, GroupNode toNode) {
 		if(fromNode == null || toNode == null) return;  
 		if(fromNode.getLevel() == toNode.getLevel()) { // remove to
 			List<GroupNode> curLevel = flow.get(fromNode.getLevel());
@@ -181,7 +197,7 @@ public class WorkFlow {
 		fromNode.toLink(link);
 		toNode.fromLink(link);
 	}
-	private void insertGroup(GroupNode group, String[] precedentGroup) {
+	private synchronized void insertGroup(GroupNode group, String[] precedentGroup) {
 		int min = 0;
 		if(precedentGroup != null) {
 			for(int i = 0; i < precedentGroup.length; i++) {
@@ -198,8 +214,8 @@ public class WorkFlow {
 		group.setLevel(min);
 		return ;
 	}
-
-	private void updateLayout() {
+	// MUST operate on a consistent view
+	private synchronized void updateLayout() {
 		if(groups.size() == 0) return ;
 		float margin = (canvas.data[0] / flow.size()) / 2.0f;
 		if(margin < minMarginOfWidth * canvas.data[0]) {

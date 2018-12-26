@@ -1,16 +1,17 @@
 package crowd.concurrent;
 
+// no time constraint granted for those operation without time tag
 public class Actor extends Thread implements Comparable<Actor> {
 	public final int timestamp;
 	private Integer threshold;
 	private Boolean finished = new Boolean(false);
+	private ConsumeActor target = null;
 	// private final String name;
 	public Actor(int t, Runnable target) {
 		super(target);
 		timestamp = t;
 		threshold = new Integer(t); // blocking in current task until the sub-Actors are clear
 	}
-	private ConsumeActor target;
 	public Actor(int t, ConsumeActor target) {
 		super();
 		timestamp = t;

@@ -20,11 +20,17 @@ Here is a screenshot of alpha version UI:
 
 ## Crowd Simulator
 
-Crowd deploy simulated nodes based on `Crowd Script`, which provide expressive way of designing custom distributed protocol.
+### Dynamic Loading
 
-During runtime, script is dynamicly compiled and instantiated into new nodes. To constraint the simulation thread amount in a controllable limit, simulator employs a main scheduler thread that receives discrete time events and schedules them onto fixed amount of sub-thread workers. Both real-time and speculative simulation driver are for option when running.
+Crowd simulator decouples the necessary logic for system simulation from implementations. User are allowed to input logical script during runtime and Crowd will automatically handle the deployment and simulation of virtual nodes.
 
-Once the monitor is launched, user can start predefined simulation task or create new node with Crowd Script dynamically.
+During runtime, script is dynamicly compiled and instantiated into new nodes. For now Crowd simply leverage JVM dynamic loading. 
+
+### Discrete Time Event Simulating
+
+To constraint the simulating threads to a controllable limit, simulator employs a main scheduler that takes over all discrete time events and schedules them onto fixed amount of sub-thread workers. Both real-time and speculative simulation driver are for option while running.
+
+### Preset Algorithm
 
 Currently support algorithm:
 

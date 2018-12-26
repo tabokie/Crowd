@@ -5,31 +5,11 @@ import java.util.*;
 import java.lang.Math;
 
 public class ConcurrentPriorityQueue<E> {
-	// workaround to avoid use of java.Unsafe 
-	// because AtomicMarkableReference do not offer getAndSet method
-	/* // deprecated for cas failure
-	private class WrappedAtomicReference<Ref> {
-		public AtomicReference<Ref> reference; // single instance through copy
-		public final boolean flag; // no need for atomic protect
-		WrappedAtomicReference(Ref ref, boolean f) {
-			reference = new AtomicReference<Ref>(ref);
-			flag = f;
-		}
-		WrappedAtomicReference(boolean f) {
-			reference = new AtomicReference<Ref>();
-			flag = f;
-		}
-		WrappedAtomicReference(AtomicReference<Ref> shadow, boolean f) {
-			reference = shadow;
-			flag = f;
-		}
-	}
-	*/
+
 	private class Node<E> {
 		public E value;
-		// a wrapped node pointer made atomic
-		// private AtomicReference<WrappedAtomicReference<Node<E>>> firstNext
-			// = new AtomicReference<WrappedAtomicReference<Node<E>>>(new WrappedAtomicReference<Node<E>>());
+		// workaround to avoid use of java.Unsafe 
+		// because AtomicMarkableReference do not offer getAndSet method
 		private DecoupledAtomicMarkableReference<Node<E>> firstNext 
 			= new DecoupledAtomicMarkableReference<Node<E>>(null, false);
 		private AtomicReference<?>[] otherNext; // java dis-allow generic array

@@ -16,8 +16,8 @@ public class Node {
 	private GroupNode parent;
 	private Pane pane;
 	private String id;
-	private List<NodeLink> from = new ArrayList<NodeLink>();
-	private List<NodeLink> to = new ArrayList<NodeLink>();
+	private List<NodeLink> from = new Vector<NodeLink>();
+	private List<NodeLink> to = new Vector<NodeLink>();
 
 	Node(Pane p, GroupNode group, String name) {
 		parent = group;

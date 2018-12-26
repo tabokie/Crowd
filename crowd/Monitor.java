@@ -55,6 +55,9 @@ public class Monitor extends Application {
         }
         // flow.setHalo(tokens[1], Float.parseFloat(tokens[2]));
       }
+      else if(tokens[0].equals("start")) {
+        flow.startConcurrentTest(Integer.parseInt(tokens[1]));
+      }
     }
     return ;
   }

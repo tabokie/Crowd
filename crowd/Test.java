@@ -64,8 +64,11 @@ public class Test {
 		scheduler.start();
 		scheduler.close();
 	}
+	Test(String s) {
+		// test concurrent operation on workflow
+	}
 	public static void main(String[] args) {
-		Test testInstance = new Test(1);
+		Test testInstance = new Test("");
 
 
 		// BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
