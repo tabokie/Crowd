@@ -36,7 +36,7 @@ For requesting thread, use CAS on delete flag to find and set the minimum node t
 
 * No ordering mechanism for request, may cause starvation
 
-## A Skiplist-Based Concurrent Priority Queue with Minimal Memory Contention, 2015
+## A Skiplist-Based Concurrent Priority Queue with Minimal Memory Contention, 2015 ([pdf](./pdf/2013.A_Skiplist-Based_Concurrent_Priority_Queue_with_Minimal_Memory_Contention.pdf))
 
 ### Operation Design
 
