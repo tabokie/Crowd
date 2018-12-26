@@ -1,5 +1,7 @@
 package crowd;
 
+import java.util.*;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
@@ -15,7 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.layout.Background;
 
-import java.util.*;
+import crowd.ui.*;
 
 // 2-dimentional workflow
 // distributed replication using round visualization

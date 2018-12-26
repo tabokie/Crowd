@@ -1,4 +1,4 @@
-package crowd;
+package crowd.ui;
 
 import java.util.*;
 import javafx.scene.layout.Pane;
@@ -15,15 +15,15 @@ import javafx.animation.*;
 
 public class GroupNode {
 	// manager of nodes
-	private List<Node> members = new Vector<Node>();
+	private List<Node> members = new ArrayList<Node>();
 	private Vec2f position = new Vec2f(-1, -1);
 	private Node center = null;
 	// as member of GroupNode
 	private Circle vcenter = new Circle();
 	// public Circle halo = new Circle();
 	public Halo halo ;
-	private List<GroupLink> from = new Vector<GroupLink>();
-	private List<GroupLink> to = new Vector<GroupLink>();
+	private List<GroupLink> from = new ArrayList<GroupLink>();
+	private List<GroupLink> to = new ArrayList<GroupLink>();
 	private Pane pane;
 	private String id;
 	private int level = 0;
@@ -228,34 +228,4 @@ public class GroupNode {
 			node.exportSpeculativeState(kvs);
 		}
 	}
-	// public void setNodes() {
-	// 	float total = members.size();
-	// 	float radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;
-	// 	float cur = 0;
-	// 	for(Node node : members ) {
-	// 		float half = 1.0f / total * (float)Math.PI;
-	// 		node.setCenter(position.data[0] + radius * (float)Math.cos(cur + half), 
-	// 			position.data[1] + radius * (float)Math.sin(cur + half));
-	// 		cur += half * 2;
-	// 	}
-	// }
-	// public void setLinks() {
-	// 	float x = position.data[0];
-	// 	float y = position.data[1];
-	// 	for(GroupLink link : from) {
-	// 		link.setEnd(x, y);
-	// 	}
-	// 	for(GroupLink link : to) {
-	// 		link.setStart(x, y);
-	// 	}
-	// }
-	// public void setCenter(float x, float y) {
-	// 	position.data[0] = x;
-	// 	position.data[1] = y;
-	// 	speculativeStateReady = false;
-	// 	vcenter.setCenterX(x);
-	// 	vcenter.setCenterY(y);
-	// 	setNodes();
-	// 	setLinks();
-	// }
 }

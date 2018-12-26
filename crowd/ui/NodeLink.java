@@ -1,4 +1,4 @@
-package crowd;
+package crowd.ui;
 
 import javafx.animation.KeyValue;
 import javafx.scene.paint.Color;

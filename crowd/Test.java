@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.io.*;
 
 import crowd.concurrent.*;
+import crowd.ui.*;
 
 public class Test {
 	private JavaCompiler javaCompiler;

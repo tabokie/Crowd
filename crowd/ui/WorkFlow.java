@@ -1,4 +1,4 @@
-package crowd;
+package crowd.ui;
 
 import javafx.scene.layout.Pane;
 import javafx.animation.Timeline;
@@ -8,16 +8,22 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import java.util.*;
 
-public class WorkFlow {
+import javafx.application.Platform;
+
+/**
+ * This class is NOT thread safe,
+ * hand it to javafx.Application thread.
+ */
+public class WorkFlow { // not thread safe
 	private List<List<GroupNode>> flow = new ArrayList<List<GroupNode>>();
-	private Map<String, Node> nodes = new Hashtable<String, Node>(); // thread safe
-	private Map<String, GroupNode> groups = new Hashtable<String, GroupNode>();
+	private Map<String, Node> nodes = new HashMap<String, Node>();
+	private Map<String, GroupNode> groups = new HashMap<String, GroupNode>();
 	private Vec2f origin = new Vec2f();
 	private Vec2f canvas = new Vec2f();
 	private Pane pane;
 	private final static float minMarginOfWidth = 0.07f;
 	private final static float minHeaderOfWidth = 0.05f;
-	WorkFlow(Pane p, Vec2f o, Vec2f size) {
+	public WorkFlow(Pane p, Vec2f o, Vec2f size) {
 		pane = p;
 		origin.copy(o);
 		canvas.copy(size);
@@ -25,17 +31,15 @@ public class WorkFlow {
 	public void startConcurrentTest(int baseSize) {
 		for(int i = 0; i < 100; i ++) {
 			final int tmp = i;
-			Thread work = new Thread(() -> {
+			Platform.runLater(()->{
 				this.newGroup("2." + String.valueOf(tmp), new String[]{"1." + String.valueOf(tmp % baseSize)});
 			});
-			work.start();
 		}
 		for(int i = 0; i < 100; i ++) {
 			final int tmp = i;
-			Thread work = new Thread(() -> {
+			Platform.runLater(()->{
 				this.newNode("n." + String.valueOf(tmp) , "2." + String.valueOf(tmp));
 			});
-			work.start();
 		}
 	}
 	public void report() {
@@ -167,7 +171,7 @@ public class WorkFlow {
 		group.exportSpeculativeState(kvs);
 		nextFrame(kvs, millis);
 	}
-	private synchronized void precedeGroup(GroupNode fromNode, GroupNode toNode) {
+	private void precedeGroup(GroupNode fromNode, GroupNode toNode) {
 		if(fromNode == null || toNode == null) return;  
 		if(fromNode.getLevel() == toNode.getLevel()) { // remove to
 			List<GroupNode> curLevel = flow.get(fromNode.getLevel());
@@ -197,7 +201,7 @@ public class WorkFlow {
 		fromNode.toLink(link);
 		toNode.fromLink(link);
 	}
-	private synchronized void insertGroup(GroupNode group, String[] precedentGroup) {
+	private void insertGroup(GroupNode group, String[] precedentGroup) {
 		int min = 0;
 		if(precedentGroup != null) {
 			for(int i = 0; i < precedentGroup.length; i++) {
@@ -215,7 +219,7 @@ public class WorkFlow {
 		return ;
 	}
 	// MUST operate on a consistent view
-	private synchronized void updateLayout() {
+	private void updateLayout() {
 		if(groups.size() == 0) return ;
 		float margin = (canvas.data[0] / flow.size()) / 2.0f;
 		if(margin < minMarginOfWidth * canvas.data[0]) {

@@ -1,7 +1,7 @@
 #  -Xlint:unchecked
 
 build: crowd/*.java
-	javac -Djava.ext.dirs=.;./lib crowd/*.java crowd/concurrent/*.java -d ./build -encoding UTF-8
+	javac -Djava.ext.dirs=.;./lib crowd/*.java crowd/concurrent/*.java crowd/ui/*.java -d ./build -encoding UTF-8
 monitor: build
 	java -cp .;./build -Djava.ext.dirs=.;./lib crowd.Monitor
 worker: build

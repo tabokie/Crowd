@@ -1,4 +1,4 @@
-package crowd;
+package crowd.ui;
 
 import javafx.scene.shape.*;
 import javafx.scene.layout.Pane;
@@ -16,8 +16,8 @@ public class Node {
 	private GroupNode parent;
 	private Pane pane;
 	private String id;
-	private List<NodeLink> from = new Vector<NodeLink>();
-	private List<NodeLink> to = new Vector<NodeLink>();
+	private List<NodeLink> from = new ArrayList<NodeLink>();
+	private List<NodeLink> to = new ArrayList<NodeLink>();
 
 	Node(Pane p, GroupNode group, String name) {
 		parent = group;

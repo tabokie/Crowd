@@ -1,4 +1,4 @@
-package crowd;
+package crowd.ui;
 
 public class Vec2f {
 	public float[] data = new float[2];

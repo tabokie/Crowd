@@ -1,4 +1,4 @@
-package crowd;
+package crowd.ui;
 
 import javafx.scene.shape.*;
 import javafx.beans.property.*;
