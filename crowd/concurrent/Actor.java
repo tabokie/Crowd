@@ -6,6 +6,7 @@ public class Actor extends Thread implements Comparable<Actor> {
 	private Integer threshold;
 	private Boolean finished = new Boolean(false);
 	private ConsumeActor target = null;
+	// private StateType state;
 	// private final String name;
 	public Actor(int t, Runnable target) {
 		super(target);

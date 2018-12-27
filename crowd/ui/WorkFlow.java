@@ -28,6 +28,16 @@ public class WorkFlow { // not thread safe
 		origin.copy(o);
 		canvas.copy(size);
 	}
+	public void updateWidth(double w) {
+		canvas.data[0] = (float) w;
+		updateLayout();
+		nextFrame(10);
+	}
+	public void updateHeight(double h) {
+		canvas.data[1] = (float) h;
+		updateLayout();
+		nextFrame(10);
+	}
 	public void startConcurrentTest(int baseSize) {
 		for(int i = 0; i < 100; i ++) {
 			final int tmp = i;

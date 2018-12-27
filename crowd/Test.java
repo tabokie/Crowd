@@ -4,6 +4,7 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.lang.reflect.Method;
 import java.io.*;
+import java.util.function.*;
 
 import crowd.concurrent.*;
 import crowd.ui.*;
@@ -34,59 +35,88 @@ public class Test {
 	 		e.printStackTrace();
 	 	}
 	}
-	Test(boolean a) {
-		javaCompiler = ToolProvider.getSystemJavaCompiler();
-		if(javaCompiler == null) {
+	public boolean run() {
+		return true;
+	}
+	public Test() { }
+	public static Test NewLoadingTest() {
+		Test ret = new Test();
+		ret.javaCompiler = ToolProvider.getSystemJavaCompiler();
+		if(ret.javaCompiler == null) {
 			System.out.println("Can't find system javac");
 			System.out.println("Probable solution: copy `tools.lib` from jdk directory to `" + System.getProperty("java.home") + "\\lib`");
 		}
+		return ret;
 	}
-	Test(int a) {
-		DiscreteEventScheduler scheduler = new DiscreteEventScheduler();
-		scheduler.enqueue(new Actor(0, (Actor actor) -> {
-			System.out.println("A running");
-			actor.act(1, () -> {
-				System.out.println("A.1 done");
-			});
-			actor.act(2, () -> {
-				System.out.println("A.2 done");
-			});
-		}));
-		scheduler.enqueue(new Actor(0, (Actor actor) -> {
-			System.out.println("B running");
-			actor.act(1, () -> {
-				System.out.println("B.1 done");
-			});
-			actor.act(10, () -> {
-				System.out.println("B.10 done");
-			});
-		}));
+	public static Test NewScheduleTest() {
+		Test ret = new Test() {
+			@Override
+			public boolean run() {
+				DiscreteEventScheduler scheduler = new DiscreteEventScheduler();
+				scheduler.enqueue(new Actor(0, (Actor actor) -> {
+					System.out.println("A running");
+					actor.act(1, () -> {
+						System.out.println("A.1 done");
+					});
+					actor.act(2, () -> {
+						System.out.println("A.2 done");
+					});
+				}));
+				scheduler.enqueue(new Actor(0, (Actor actor) -> {
+					System.out.println("B running");
+					actor.act(1, () -> {
+						System.out.println("B.1 done");
+					});
+					actor.act(10, () -> {
+						System.out.println("B.10 done");
+					});
+				}));
 
-		scheduler.start();
-		scheduler.close();
+				scheduler.start();
+				scheduler.close();
+				return true;
+			}
+		};
+		return ret;
 	}
-	Test(String s) {
-		// test concurrent operation on workflow
+	public static Test NewSimulateTest() {
+		Test ret = new Test();
+		return ret;
+	}
+
+	public static void feed(Predicate<String> consumer) {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in)) ;
+		while(true) {
+			try {
+				String line = reader.readLine();
+				if(line.startsWith("exit"))break;
+				if(! consumer.test(line)) break;
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+				break;
+			}
+		}
 	}
 	public static void main(String[] args) {
-		Test testInstance = new Test("");
+		if(args.length > 0) {
+			System.out.println("test argument: " + args[0]);
+			if(args[0].equals("load_function")) {
+				Test instance = NewLoadingTest();
+				feed((String msg) -> {
+					instance.compile(msg);
+					return true;
+				});
+			}
+			else if(args[0].equals("schedule")) {
+				Test instance = NewScheduleTest();
+				instance.run();
+			}
+			else if(args[0].equals("simulate")) {
+				Test instance = NewSimulateTest();
+				instance.run();
+			}
+		}
 
-
-		// BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		// while(true) {
-		// 	try {
-		// 		String line = reader.readLine();
-		// 		if(line.startsWith("exit")){
-		// 			break;
-		// 		}
-		// 		else {
-		// 			testInstance.compile(line);
-		// 		}	
-		// 	}
-		// 	catch(Exception e) {
-		// 		e.printStackTrace();
-		// 		break;
-		// 	}
-		// }
 	}
 }

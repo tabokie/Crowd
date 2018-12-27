@@ -19,4 +19,7 @@ public class Vec2f {
 			data[1] = rhs.data[1];
 		}
 	}
+	public String toString() {
+		return String.valueOf(data[0]) + ", " + String.valueOf(data[1]);
+	}
 }

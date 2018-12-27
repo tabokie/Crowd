@@ -7,7 +7,7 @@ monitor: build
 worker: build
 	java -cp .;./build -Djava.ext.dirs=.;./lib crowd.Worker
 test: build
-	java -cp .;./build -Djava.ext.dirs=.;./lib crowd.Test
+	java -cp .;./build -Djava.ext.dirs=.;./lib crowd.Test $(P)
 
 .PHONY : clean
 clean : 

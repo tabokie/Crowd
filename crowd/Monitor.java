@@ -16,14 +16,14 @@ import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.layout.Background;
-
+import javafx.beans.value.*;
 import crowd.ui.*;
 
 // 2-dimentional workflow
 // distributed replication using round visualization
 
 public class Monitor extends Application {
-  Pane pane = null;
+  BorderPane pane = null;
   Pane contentPane = null;
   WorkFlow flow = null;
   private void handleCommand(String command) {
@@ -55,7 +55,6 @@ public class Monitor extends Application {
         if(tokens.length >= 4) {
           flow.setHalo(tokens[1], Float.parseFloat(tokens[2]), Float.parseFloat(tokens[3]));
         }
-        // flow.setHalo(tokens[1], Float.parseFloat(tokens[2]));
       }
       else if(tokens[0].equals("start")) {
         flow.startConcurrentTest(Integer.parseInt(tokens[1]));
@@ -65,14 +64,15 @@ public class Monitor extends Application {
   }
 
   public void start(Stage primaryStage) {
-    pane = new Pane();
+    pane = new BorderPane();
     pane.setBackground(Background.EMPTY);
     contentPane = new Pane();
+    contentPane.setMaxSize(1920, 1080);
+    // contentPane.setPrefSize(800, 400); // is auto updated by children's position
 
     flow = new WorkFlow(contentPane, new Vec2f(0, 0), new Vec2f(800, 400));
-    flow.newGroup("leader");
-    flow.newGroup("follower1", new String[]{"leader"});
-    flow.newGroup("follower2", new String[]{"leader"});
+    flow.newGroup("1.0",null);
+    flow.newGroup("1.1",null);
 
     Button submit = new Button("submit");
     submit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -85,20 +85,39 @@ public class Monitor extends Application {
         }
       }
     });
-    pane.getChildren().add(contentPane);
     HBox box = new HBox();
     box.getChildren().addAll(submit, textField);
+    box.setPadding(new Insets(7, 12, 7, 12));
     box.setSpacing(10);
+    box.setAlignment(Pos.CENTER);
+    box.setHgrow(textField, Priority.ALWAYS);
     submit.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         handleCommand(textField.getText());
       }
     });
-    pane.getChildren().add(box);
+    final double widgetHeight = 30;
+    box.setMinHeight(widgetHeight);
+    pane.setTop(contentPane);
+    pane.setBottom(box);
+
+    pane.heightProperty().addListener(new ChangeListener(){
+      @Override
+      public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+        flow.updateHeight((double)newVal - widgetHeight);
+      }
+    });
+    pane.widthProperty().addListener(new ChangeListener(){
+      @Override
+      public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+        flow.updateWidth((double)newVal);
+      }
+    });
+
 
     Scene scene =new Scene(pane,800,400);
-    primaryStage.setTitle("CubicBezierCurve");
+    primaryStage.setTitle("Crowd");
     primaryStage.setScene(scene);
     primaryStage.show();
   }
