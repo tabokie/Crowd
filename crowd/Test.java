@@ -5,6 +5,8 @@ import javax.tools.ToolProvider;
 import java.lang.reflect.Method;
 import java.io.*;
 import java.util.function.*;
+import java.util.*;
+import java.util.concurrent.atomic.*;
 
 import crowd.concurrent.*;
 import crowd.ui.*;
@@ -12,6 +14,7 @@ import crowd.ui.*;
 public class Test {
 	private JavaCompiler javaCompiler;
 	private void compile(String name) {
+		/*
 		if(javaCompiler == null) return ; 
 		String classpath = System.getProperty("user.dir") + "\\build";
 		// System.out.println("Target classpath: " + classpath);
@@ -34,6 +37,7 @@ public class Test {
 	 	catch(Exception e) {
 	 		e.printStackTrace();
 	 	}
+	 	*/
 	}
 	public boolean run() {
 		return true;
@@ -53,7 +57,7 @@ public class Test {
 			@Override
 			public boolean run() {
 				DiscreteEventScheduler scheduler = new DiscreteEventScheduler();
-				scheduler.enqueue(new Actor(0, (Actor actor) -> {
+				scheduler.enqueue(0, (Actor actor) -> {
 					System.out.println("A running");
 					actor.act(1, () -> {
 						System.out.println("A.1 done");
@@ -61,8 +65,8 @@ public class Test {
 					actor.act(2, () -> {
 						System.out.println("A.2 done");
 					});
-				}));
-				scheduler.enqueue(new Actor(0, (Actor actor) -> {
+				});
+				scheduler.enqueue(0, (Actor actor) -> {
 					System.out.println("B running");
 					actor.act(1, () -> {
 						System.out.println("B.1 done");
@@ -70,7 +74,7 @@ public class Test {
 					actor.act(10, () -> {
 						System.out.println("B.10 done");
 					});
-				}));
+				});
 
 				scheduler.start();
 				scheduler.close();
@@ -80,7 +84,20 @@ public class Test {
 		return ret;
 	}
 	public static Test NewSimulateTest() {
-		Test ret = new Test();
+		Test ret = new Test() {
+			@Override
+			public boolean run() {
+				Simulator simulator = new Simulator();
+				simulator.addPrototype("echo", new EchoPrototype());
+				Map<String, Object> datas = simulator.addNode("left", "echo");
+				datas.put("target", "right");
+				datas.put("count", new AtomicInteger(0));
+				simulator.addNode("right", "echo").put("count", new AtomicInteger(0));
+				simulator.startNode("left");
+				simulator.run();
+				return true;
+			}
+		};
 		return ret;
 	}
 

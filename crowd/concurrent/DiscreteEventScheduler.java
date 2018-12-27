@@ -4,12 +4,20 @@ import java.util.concurrent.atomic.*;
 
 public class DiscreteEventScheduler extends Thread {
 	private ConcurrentPriorityQueue<Actor> actorQueue = new ConcurrentPriorityQueue<Actor>();
-	private int timestamp = 0;
+	private volatile int timestamp = 0; // can only be modified by scheduler thread
 	private final int BUFFER_SIZE = 10;
 	private Actor[] actorBuffer = new Actor[BUFFER_SIZE];
 	private int size = 0;
 	private AtomicBoolean closed = new AtomicBoolean(false);
-	public void enqueue(Actor e) {
+	public void enqueue(int time, ConsumeActor task) {
+		Actor e = new Actor(time + timestamp, task);
+		actorQueue.insert(e);
+	}
+	public void enqueue(int time, Runnable task) {
+		Actor e = new Actor(time + timestamp, task);
+		actorQueue.insert(e);
+	}
+	public void enqueue(Actor e) { // shouldn't call from outside, only by actor
 		actorQueue.insert(e);
 	}
 	public void put() {
@@ -67,10 +75,13 @@ public class DiscreteEventScheduler extends Thread {
 		for(int i = 0; i < size; i ++ ){
 			if(actorBuffer[i] == null) return i;
 		}
-		if(size <= BUFFER_SIZE) { // expand
+		if(size + 1 < BUFFER_SIZE) { // expand
 			size ++;
 			return size-1;
 		}
 		return  -1;
+	}
+	public int getTimestamp() { // not thread safe
+		return timestamp;
 	}
 }

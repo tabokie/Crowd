@@ -32,18 +32,20 @@ public class Actor extends Thread implements Comparable<Actor> {
 		return "Actor[" + String.valueOf(timestamp) + "]";
 	}
 	public void act(int time, Runnable event) {
-		setThreshold(time); // meaning locally, all event <= time is finished.
+		setThreshold(time + timestamp); // meaning locally, all event <= time is finished.
 		if(scheduler != null) {
-			scheduler.enqueue(new Actor(time, event));
+			// scheduler.enqueue(time, event); // shouldn't use global view here
+			scheduler.enqueue(new Actor(time + timestamp, event));
 		}
 		else {
 			event.run();
 		}
 	}
 	public void act(int time, ConsumeActor event) {
-		setThreshold(time);
+		setThreshold(time + timestamp);
 		if(scheduler != null) {
-			scheduler.enqueue(new Actor(time, event));
+			// scheduler.enqueue(time, event);
+			scheduler.enqueue(new Actor(time + timestamp, event));
 		}
 		else {
 			event.run(this);

@@ -30,6 +30,26 @@ During runtime, script is dynamicly compiled and instantiated into new nodes. Fo
 
 To constraint the simulating threads to a controllable limit, simulator employs a main scheduler that takes over all discrete time events and schedules them onto fixed amount of sub-thread workers. Both real-time and speculative simulation driver are for option while running.
 
+To ease the pain of user-end event design, Crowd introduces Actor to balance the use of local time and global time.
+
+Here is a use case, notice the relative timing order between event.
+
+```Java
+// this happens in a local thread while global time is T
+scheduler.enqueue(new Actor(0, (Actor actor) -> {
+	actor.act(1, ()->{
+		System.out.println("T+1 seconds from now");
+	});
+	actor.act(2, (Actor actor) -> {
+		System.out.println("T+2 seconds from now");
+		actor.act(3, ()->{
+			System.out.println("T+2+3 seconds from now");
+		});
+	});
+}));
+```
+
+
 ### Preset Algorithm
 
 Currently support algorithm:

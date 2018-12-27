@@ -12,6 +12,29 @@ public class Simulator {
 	public Simulator (Protocol p) {
 		this.protocol = p;
 	}
+	public Simulator() { }
+	public DiscreteEventScheduler getScheduler() {
+		return scheduler;
+	}
+	public void addPrototype(String type, Prototype prototype) {
+		prototypes.put(type, prototype);
+	}
+	public Map<String, Object> addNode(String name, String type) {
+		Map<String, Object> datas = new ConcurrentHashMap<String, Object>();
+		nodeState.put(name, datas);
+		datas.put("type", type);
+		return datas;
+	}
+	public void startNode(String name) {
+		String type = (String)getData(name, "type");
+		if(type == null) return ;
+		Prototype node = prototypes.get(type);
+		node.start(name, this);
+	}
+	public void run() {
+		scheduler.start();
+		scheduler.close();
+	}
 	public void setProtocol(Protocol protocol) {
 		this.protocol = protocol;
 	}
@@ -32,6 +55,9 @@ public class Simulator {
 		}
 		return datas;
 	}
+	public int getTime() {
+		return scheduler.getTimestamp();
+	}
 	public void setData(String node, String name, Object data) {
 		Map<String, Object> datas = getDatas(node);
 		// assert(datas != null)
@@ -43,6 +69,6 @@ public class Simulator {
 		String type = (String)data;
 		Prototype node = prototypes.get(type);
 		if(node == null) return;
-		node.receive(this, fromNode, message);
+		node.receive(toNode, this, fromNode, message);
 	}
 }

@@ -54,6 +54,4 @@ Insert after logically deleted node, maintaining the prefix of deleted nodes.
 
 * Reduce CAS operation count by buffering deleted data
 
-* inserting bit only for batch delete ?
-
-* new has been deleted ?
+* Fix bugs at DeleteMin, and patch null pointer protect.

@@ -7,7 +7,7 @@ import java.lang.Math;
 public class ConcurrentPriorityQueue<E> {
 
 	private class Node<E> {
-		public E value;
+		public final E value;
 		// workaround to avoid use of java.Unsafe 
 		// because AtomicMarkableReference do not offer getAndSet method
 		private DecoupledAtomicMarkableReference<Node<E>> firstNext 
@@ -24,6 +24,7 @@ public class ConcurrentPriorityQueue<E> {
 			}
 		}
 		Node(int size) {
+			value = null;
 			nlevels = size;
 			otherNext = new AtomicReference<?>[size - 1];
 			for(int i = 0; i < size-1; i ++) {
@@ -43,6 +44,7 @@ public class ConcurrentPriorityQueue<E> {
 			}
 		}
 		public void next(int level, Node<E> next) {
+			assert next != this;
 			if(level == 0) {
 				firstNext.set(next, false);
 			}
@@ -57,9 +59,11 @@ public class ConcurrentPriorityQueue<E> {
 			return firstNext.get(ret);
 		}
 		public boolean compareAndSet(Node<E> expNext, boolean expD, Node<E> next, boolean d) {
+			assert next != this;
 			return firstNext.compareAndSet(expNext, next, expD, d);
 		}
 		public boolean compareAndSet(int level, Node<E> expNext, Node<E> next) {
+			assert next != this;
 			if(level == 0) {
 				return firstNext.compareAndSet(expNext, next);
 			}
@@ -112,8 +116,8 @@ public class ConcurrentPriorityQueue<E> {
 			if(nxt == null) {
 				return null; // already empty
 			}
-			if(x.inserting() && newhead == null) {
-				newhead = x;
+			if(nxt.inserting() && newhead == null) { // bugs in paper //
+				newhead = nxt;
 			}
 			nxt = x.getAndDeleteNext(deleteFlag);
 			// nxt = x.next(0); // shouldn't change after getAndDelete
@@ -136,7 +140,12 @@ public class ConcurrentPriorityQueue<E> {
 		String ret = "";
 		Node<E> cur = head.next(0);
 		while(cur != null) {
-			ret += ">" + cur.value.toString() + "-";
+			if(cur.value == null) {
+				ret += ">" + "null" + "-";
+			}
+			else {
+				ret += ">" + cur.value.toString() + "-";
+			}
 			cur = cur.next(0);
 		}
 		ret += "<";
@@ -177,7 +186,7 @@ public class ConcurrentPriorityQueue<E> {
 		while(i > 0) {
 			h = head.next(i);
 			cur = pred.next(i);
-			if(!h.deleted()) {
+			if(h == null || !h.deleted()) {
 				i--;
 				continue;
 			}
