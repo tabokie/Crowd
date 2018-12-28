@@ -25,7 +25,7 @@ import crowd.ui.*;
 public class Monitor extends Application {
   BorderPane pane = null;
   Pane contentPane = null;
-  WorkFlow flow = null;
+  public static WorkFlow flow = null;
   private void handleCommand(String command) {
     if(command != null && !command.isEmpty() && flow != null) {
       String[] tokens = command.split(" ");
@@ -71,8 +71,8 @@ public class Monitor extends Application {
     // contentPane.setPrefSize(800, 400); // is auto updated by children's position
 
     flow = new WorkFlow(contentPane, new Vec2f(0, 0), new Vec2f(800, 400));
-    flow.newGroup("1.0",null);
-    flow.newGroup("1.1",null);
+    // flow.newGroup("1.0",null);
+    // flow.newGroup("1.1",null);
 
     Button submit = new Button("submit");
     submit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -120,9 +120,12 @@ public class Monitor extends Application {
     primaryStage.setTitle("Crowd");
     primaryStage.setScene(scene);
     primaryStage.show();
+
+    Test testCase = Test.NewSimulateTest();
+    testCase.start();
   }
   public static void main(String[] args) {
-    launch(args);
+    launch(args); // blocking start
   }
 }
 

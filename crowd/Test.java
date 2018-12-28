@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.*;
 import crowd.concurrent.*;
 import crowd.ui.*;
 
-public class Test {
+public class Test extends Thread{
 	private JavaCompiler javaCompiler;
 	private void compile(String name) {
 		/*
@@ -39,8 +39,9 @@ public class Test {
 	 	}
 	 	*/
 	}
-	public boolean run() {
-		return true;
+	@Override
+	public void run() {
+
 	}
 	public Test() { }
 	public static Test NewLoadingTest() {
@@ -55,7 +56,7 @@ public class Test {
 	public static Test NewScheduleTest() {
 		Test ret = new Test() {
 			@Override
-			public boolean run() {
+			public void run() {
 				DiscreteEventScheduler scheduler = new DiscreteEventScheduler();
 				scheduler.enqueue(0, (Actor actor) -> {
 					System.out.println("A running");
@@ -78,7 +79,6 @@ public class Test {
 
 				scheduler.start();
 				scheduler.close();
-				return true;
 			}
 		};
 		return ret;
@@ -86,7 +86,7 @@ public class Test {
 	public static Test NewSimulateTest() {
 		Test ret = new Test() {
 			@Override
-			public boolean run() {
+			public void run() {
 				Simulator simulator = new Simulator();
 				simulator.addPrototype("echo", new EchoPrototype());
 				Map<String, Object> datas = simulator.addNode("left", "echo");
@@ -95,7 +95,6 @@ public class Test {
 				simulator.addNode("right", "echo").put("count", new AtomicInteger(0));
 				simulator.startNode("left");
 				simulator.run();
-				return true;
 			}
 		};
 		return ret;

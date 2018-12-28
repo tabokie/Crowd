@@ -10,6 +10,35 @@ import javafx.beans.property.*;
 
 public class BalancedCubicCurve implements BalancedCurve {
 	private CubicCurve curve;
+	BalancedCubicCurve(Pane pane, BalancedCubicCurve rhs) {
+		rhs.startXProperty().addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				curve.setStartX((double) newVal);
+			}
+		});
+		rhs.endXProperty().addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				curve.setEndX((double) newVal);
+			}
+		});
+		rhs.startYProperty().addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				curve.setStartY((double) newVal);
+			}
+		});
+		rhs.endYProperty().addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				curve.setEndY((double) newVal);
+			}
+		});
+		curve = new CubicCurve();
+		configureCurve(curve);
+		pane.getChildren().add(curve);
+	}
 	BalancedCubicCurve(Pane pane) {
 		curve = new CubicCurve();
 		configureCurve(curve);
@@ -95,7 +124,7 @@ public class BalancedCubicCurve implements BalancedCurve {
 		return curve.endYProperty();
 	}
 	public BalancedCurve copy(Pane p) {
-		BalancedCurve ret = new BalancedCubicCurve(p);
+		BalancedCurve ret = new BalancedCubicCurve(p, this);
 		ret.setStart(curve.getStartX(), curve.getStartY());
 		ret.setEnd(curve.getEndX(), curve.getEndY());
 		ret.setColor(curve.getStroke());

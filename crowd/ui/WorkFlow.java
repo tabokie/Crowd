@@ -65,9 +65,11 @@ public class WorkFlow { // not thread safe
 	}
 	// public interface will update layout at the end
 	public String newGroup(String name) {
+		System.out.println("New group: " + name);
 		return newGroup(name, null);
 	}
 	public String newGroup(String name, String[] requisite) {
+		System.out.println("New group: " + name);
 		GroupNode group = groups.get(name);
 		if(group != null) {
 			return new String("find duplicated group named " + name);
@@ -130,13 +132,17 @@ public class WorkFlow { // not thread safe
 	public String setStroke(String groupId, String target, float width) {
 		GroupNode groupNode = groups.get(groupId);
 		if(groupNode == null) return new String("can't find group named " + groupId);
-		GroupLink li = groupNode.getOut(target);
-		if(li == null) return new String("can't find route from " + groupId + " to " + target);
 		List<KeyValue> kvs = new ArrayList<KeyValue>();
-		// kvs.add(new KeyValue(li.curve.strokeWidthProperty(), width ));
-		// li.ripple.start(kvs);
-		li.curve.startRipple(kvs);
-		nextFrame(kvs, 2000);
+		GroupLink li = groupNode.getOut(target);
+		// if(li == null) return new String("can't find route from " + groupId + " to " + target);
+		if(li != null ){
+			li.curve.startRipple(kvs);
+		}
+		else {
+			li = groupNode.getIn(target);
+			li.curve.rstartRipple(kvs);
+		}
+		nextFrame(kvs, 500);
 		return null;
 	}
 	public String setHalo(String groupId, float radius, float progress) {

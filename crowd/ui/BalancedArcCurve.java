@@ -8,15 +8,55 @@ import javafx.animation.KeyValue;
 import javafx.beans.property.*;
 import java.util.*;
 
+// delegated by member property
 public class BalancedArcCurve implements BalancedCurve {
 	public Arc curve;
 	private DoubleProperty centerXProperty;
 	private DoubleProperty centerYProperty;
-	private DoubleProperty startXProperty = new SimpleDoubleProperty();
-	private DoubleProperty startYProperty = new SimpleDoubleProperty();
-	private DoubleProperty endXProperty = new SimpleDoubleProperty();
-	private DoubleProperty endYProperty = new SimpleDoubleProperty();
+	private DoubleProperty startXProperty;
+	private DoubleProperty startYProperty;
+	private DoubleProperty endXProperty;
+	private DoubleProperty endYProperty;
+	BalancedArcCurve(Pane pane, BalancedArcCurve rhs) {
+		centerXProperty = rhs.centerXProperty;
+		centerYProperty = rhs.centerYProperty;
+		startXProperty = rhs.startXProperty();
+		startYProperty = rhs.startYProperty();
+		endXProperty = rhs.endXProperty();
+		endYProperty = rhs.endYProperty();
+		curve = new Arc();
+		configureCurve(curve);
+		startXProperty.addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				solveNodeLink(curve, (double)newVal, startYProperty.getValue(), endXProperty.getValue(), endYProperty.getValue(), centerXProperty.getValue(), centerYProperty.getValue());
+			}
+		});
+		startYProperty.addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				solveNodeLink(curve, startXProperty.getValue(), (double)newVal, endXProperty.getValue(), endYProperty.getValue(), centerXProperty.getValue(), centerYProperty.getValue());
+			}
+		});
+		endXProperty.addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				solveNodeLink(curve, startXProperty.getValue(), startYProperty.getValue(), (double)newVal, endYProperty.getValue(), centerXProperty.getValue(), centerYProperty.getValue());
+			}
+		});
+		endYProperty.addListener(new ChangeListener(){
+			@Override
+			public void changed(ObservableValue obj, Object oldVal, Object newVal) {
+				solveNodeLink(curve, startXProperty.getValue(), startYProperty.getValue(), endXProperty.getValue(), (double)newVal, centerXProperty.getValue(), centerYProperty.getValue());
+			}
+		});
+		pane.getChildren().add(curve);
+	}
 	BalancedArcCurve(Pane pane) {
+		startXProperty = new SimpleDoubleProperty();
+		startYProperty = new SimpleDoubleProperty();
+		endXProperty = new SimpleDoubleProperty();
+		endYProperty = new SimpleDoubleProperty();
 		curve = new Arc();
 		configureCurve(curve);
 		startXProperty.addListener(new ChangeListener(){
@@ -49,10 +89,8 @@ public class BalancedArcCurve implements BalancedCurve {
 		return curve;
 	}
 	public BalancedCurve copy(Pane p) {
-		BalancedArcCurve ret = new BalancedArcCurve(p);
-		ret.setCenterXProperty(centerXProperty);
-		ret.setCenterYProperty(centerYProperty);
-		ret.setStart(startXProperty.getValue(), startYProperty.getValue());
+		BalancedArcCurve ret = new BalancedArcCurve(p, this);
+		ret.setStart(startXProperty.getValue(), startYProperty.getValue()); // refresh layout
 		ret.setEnd(endXProperty.getValue(), endYProperty.getValue());
 		ret.setColor(curve.getStroke());
 		ret.setWidth(curve.getStrokeWidth());

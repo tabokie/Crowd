@@ -3,7 +3,12 @@ package crowd.concurrent;
 import java.util.concurrent.*;
 import java.util.*;
 
-public class Simulator {
+import javafx.application.Platform;
+
+import crowd.*;
+import crowd.ui.*;
+
+public class Simulator extends Thread {
 	private static Protocol defaultProtocol = new DefaultProtocol();
 	private Protocol protocol = null;
 	private Map<String, Prototype> prototypes = new ConcurrentHashMap<String, Prototype>();
@@ -23,6 +28,11 @@ public class Simulator {
 		Map<String, Object> datas = new ConcurrentHashMap<String, Object>();
 		nodeState.put(name, datas);
 		datas.put("type", type);
+		if(Monitor.flow != null) {
+			Platform.runLater(()->{
+				Monitor.flow.newGroup(name);
+			});
+		}
 		return datas;
 	}
 	public void startNode(String name) {
@@ -30,7 +40,13 @@ public class Simulator {
 		if(type == null) return ;
 		Prototype node = prototypes.get(type);
 		node.start(name, this);
+		if(Monitor.flow != null) {
+			Platform.runLater(()->{
+				Monitor.flow.precedeGroup(name, (String)getData(name, "target"));
+			});
+		}
 	}
+	@Override
 	public void run() {
 		scheduler.start();
 		scheduler.close();
@@ -70,5 +86,10 @@ public class Simulator {
 		Prototype node = prototypes.get(type);
 		if(node == null) return;
 		node.receive(toNode, this, fromNode, message);
+		if(Monitor.flow != null) {
+			Platform.runLater(()->{
+				Monitor.flow.setStroke(fromNode, toNode, 0);
+			});
+		}
 	}
 }
