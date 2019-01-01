@@ -39,15 +39,15 @@ Here is a use case, notice the relative timing order between event.
 ```Java
 // this happens in a local thread while global time is T
 scheduler.enqueue(new Actor(0, (Actor actor) -> {
-	actor.act(1, ()->{
-		System.out.println("T+1 seconds from now");
-	});
-	actor.act(2, (Actor actor) -> {
-		System.out.println("T+2 seconds from now");
-		actor.act(3, ()->{
-			System.out.println("T+2+3 seconds from now");
-		});
-	});
+  actor.act(1, ()->{
+    System.out.println("T+1 seconds from now");
+  });
+  actor.act(2, (Actor actor) -> {
+    System.out.println("T+2 seconds from now");
+    actor.act(3, ()->{
+      System.out.println("T+2+3 seconds from now");
+    });
+  });
 }));
 ```
 
@@ -59,44 +59,44 @@ Here is a example where a simple echo server is implemented:
 
 ```Java
 public class MyPrototype implements Prototype {
-	// called upon message
-	public void receive(String thisNode, Simulator simulator, String fromNode, String message) {
-		simulator.getScheduler().enqueue(
-			3, // response at 3-rd second
-			(Actor actor) -> {
-				AtomicInteger countRef = simulator.getData(thisNode, "count"); // you can fetch local data via simulator
-				final int count = countRef.getAndIncrement(); // incr once receive message
-				simulator.send(thisNode, fromNode, "hello from " + thisNode); // send back
-				actor.act(5, ()->{ // wait for 5 second and check
-					if( simulator.<AtomicInteger>getData(thisNode, "count").get() <= count) {
-						System.out.println("Oops, didn't get response in 5 seconds");
-					}
-					else {
-						System.out.println("Got response within 5 seconds");
-					}
-				});
-			}
-		);
-	}
-	// called upon instantiation
-	public void start(String thisNode, Simulator simulator) {
-		simulator.getScheduler().enqueue(
-			0, 
-			(Actor actor) -> {
-				AtomicInteger countRef = simulator.getData(thisNode, "count");
-				countRef.set(0); // reset count
-				simulator.send(thisNode, simulator.getData(thisNode, "target"), "hello from " + thisNode); // first message
-				actor.act(5, ()->{ // wait for 5 second and check
-					if( simulator.<AtomicInteger>getData(thisNode, "count").get() == 0) {
-						System.out.println("Oops, didn't get response after 5 seconds");
-					}
-					else {
-						System.out.println("Got response after 5 seconds");
-					}
-				});
-			}
-		);
-	}
+  // called upon message
+  public void receive(String thisNode, Simulator simulator, String fromNode, String message) {
+    simulator.getScheduler().enqueue(
+      3, // response at 3-rd second
+      (Actor actor) -> {
+        AtomicInteger countRef = simulator.getData(thisNode, "count"); // you can fetch local data via simulator
+        final int count = countRef.getAndIncrement(); // incr once receive message
+        simulator.send(thisNode, fromNode, "hello from " + thisNode); // send back
+        actor.act(5, ()->{ // wait for 5 second and check
+          if( simulator.<AtomicInteger>getData(thisNode, "count").get() <= count) {
+            System.out.println("Oops, didn't get response in 5 seconds");
+          }
+          else {
+            System.out.println("Got response within 5 seconds");
+          }
+        });
+      }
+    );
+  }
+  // called upon instantiation
+  public void start(String thisNode, Simulator simulator) {
+    simulator.getScheduler().enqueue(
+      0, 
+      (Actor actor) -> {
+        AtomicInteger countRef = simulator.getData(thisNode, "count");
+        countRef.set(0); // reset count
+        simulator.send(thisNode, simulator.getData(thisNode, "target"), "hello from " + thisNode); // first message
+        actor.act(5, ()->{ // wait for 5 second and check
+          if( simulator.<AtomicInteger>getData(thisNode, "count").get() == 0) {
+            System.out.println("Oops, didn't get response after 5 seconds");
+          }
+          else {
+            System.out.println("Got response after 5 seconds");
+          }
+        });
+      }
+    );
+  }
 }
 ```
 

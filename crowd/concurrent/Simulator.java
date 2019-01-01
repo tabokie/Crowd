@@ -13,13 +13,13 @@ public class Simulator extends Thread {
 	private Protocol protocol = null;
 	private Map<String, Prototype> prototypes = new ConcurrentHashMap<String, Prototype>();
 	private Map<String, Map<String, Object>> nodeState = new ConcurrentHashMap<String, Map<String, Object>>();
-	private DiscreteEventScheduler scheduler = new DiscreteEventScheduler();
+	private EventScheduler scheduler = new RealtimeEventScheduler();
 	public Simulator (Protocol p) {
 		this.protocol = p;
 	}
 	public Simulator() { }
 	// Accessors
-	public DiscreteEventScheduler getScheduler() {
+	public EventScheduler getScheduler() {
 		return scheduler;
 	}
 	public void setProtocol(Protocol protocol) {
@@ -46,9 +46,6 @@ public class Simulator extends Thread {
 		Map<String, Object> datas = getDatas(node);
 		datas.put(name, data);
 	}
-
-
-
 
 	public void addPrototype(String type, Prototype prototype) {
 		prototypes.put(type, prototype);
