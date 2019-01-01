@@ -2,7 +2,7 @@ package crowd.concurrent;
 
 import java.util.concurrent.atomic.*;
 
-public class DiscreteEventScheduler extends Thread implements EventScheduler{
+public class RealtimeEventScheduler extends Thread implements EventScheduler{
 	private ConcurrentPriorityQueue<Actor> actorQueue = new ConcurrentPriorityQueue<Actor>();
 	private volatile int timestamp = 0; // can only be modified by scheduler thread
 	private final int BUFFER_SIZE = 10;
@@ -36,25 +36,27 @@ public class DiscreteEventScheduler extends Thread implements EventScheduler{
 		}
 	}
 	
+	private float millisUnit = 100; // default 0.1 sec
+	public void setTimeUnit(float millis) {
+		if(millis > 0) {
+			millisUnit = millis;
+		}
+	}
+
 	@Override
 	public void run() {
+		millisReset();
 		while(!closed.get() || actorQueue.readMin() != null || findUnfinished() >= 0) {
+			timestamp = (int) (millisGet() / millisUnit);
 			// update buffer
-			int minThreshold = -1;
-			int idx = -1;
-			for(int i = 0; i < size; i ++) {
+			for(int i = 0; i < size; i ++) { // clean up
 				if(actorBuffer[i] == null) continue;
 				int t = actorBuffer[i].getThreshold();
 				if(t <= timestamp && actorBuffer[i].getFinished()) { // meaning local job all submitted 
 					actorBuffer[i] = null;
 					continue;
 				}
-				if(minThreshold < 0 || minThreshold > t) {
-					idx = i;
-					minThreshold = t;
-				}
 			}
-			if(minThreshold > timestamp)timestamp = minThreshold;
 			while(true) {
 				Actor actor = actorQueue.readMin();
 				if(actor != null && actor.timestamp <= timestamp) {
@@ -85,5 +87,20 @@ public class DiscreteEventScheduler extends Thread implements EventScheduler{
 		}
 		return  -1;
 	}
-
+	private long nanoTime;
+	private void nanoReset() {
+		nanoTime = System.nanoTime();
+	}
+	private double nanoGet() {
+		long cur = System.nanoTime();
+		return cur - nanoTime;
+	}
+	private long millisTime;
+	private void millisReset() {
+		millisTime = System.currentTimeMillis() ;
+	}
+	private double millisGet() {
+		long cur = System.currentTimeMillis();
+		return cur - millisTime;
+	}
 }

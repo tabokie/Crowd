@@ -19,8 +19,8 @@ public class Actor extends Thread implements Comparable<Actor> {
 		this.target = target;
 		threshold = new Integer(t); // blocking in current task until the sub-Actors are clear
 	}
-	private DiscreteEventScheduler scheduler;
-	public void start(DiscreteEventScheduler scheduler) {
+	private EventScheduler scheduler;
+	public void start(EventScheduler scheduler) {
 		this.scheduler = scheduler;
 		start();
 	}
