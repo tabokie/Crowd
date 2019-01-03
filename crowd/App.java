@@ -17,8 +17,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.layout.Background;
 import javafx.beans.value.*;
+
 import crowd.ui.*;
 import crowd.concurrent.*;
+import crowd.util.*;
 
 public class App extends Application {
 	private WorkFlow flow;
@@ -42,7 +44,14 @@ public class App extends Application {
 		return container;
 	}
 	public void setContainer(Container c) {
-		container = c;
+		container = c; // overwrite
+		scene = new Scene(container.getPane(), 800, 400);
+	}
+	public void addCss(String filename) {
+		if(scene != null) {
+			String path = ResourceManager.getUnixFullPath(filename);
+			scene.getStylesheets().add(path);
+		}
 	}
 	public Simulator createSimulator() {
 		return new Simulator(this);
@@ -54,10 +63,7 @@ public class App extends Application {
 	}
 	@Override
   public void start(Stage primaryStage) {
-  	if(container != null) {
-	    scene = new Scene(container.getPane(),800,400);
-  	}
-  	else {
+  	if(scene == null) {
   		scene = new Scene(contentPane, 800, 400);
   	}
     primaryStage.setTitle("Crowd");
@@ -66,7 +72,7 @@ public class App extends Application {
   }
   @Override
   public void init() throws Exception {
-  	createBuildable(Container.class).loadDefault().build();
+  	createBuildable(Container.class).loadChatbox().build();
   	// createContainer().loadDefault().build();
   }
   public static void main(String[] args) {

@@ -26,6 +26,7 @@ public class RealtimeEventScheduler extends Thread implements EventScheduler{
 	public int getTime() {
 		return timestamp;
 	}
+	// this is a BLOCKING operation
 	public void close() {
 		closed.set(true);
 		try {

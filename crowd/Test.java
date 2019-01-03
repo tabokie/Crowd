@@ -14,30 +14,28 @@ import crowd.ui.*;
 public class Test extends Thread{
 	private JavaCompiler javaCompiler;
 	private void compile(String name) {
-		/*
-		if(javaCompiler == null) return ; 
-		String classpath = System.getProperty("user.dir") + "\\build";
-		// System.out.println("Target classpath: " + classpath);
-		int compileStatus = javaCompiler.run(null, null, null, "-d", classpath , name );
-		if(compileStatus != 0) {
-			System.out.println("Compilation broke");
-		}
-	 	try {
-	 		Class injectedClass = Class.forName("crowd.MyTest");
-		 	Object injectedObject = injectedClass.newInstance();
-		 	Method respond = injectedClass.getDeclaredMethod("respond", Simulator.class, String.class);
-		 	Method report = injectedClass.getDeclaredMethod("report", Simulator.class);
-		 	Protocol protocol = new DefaultProtocol();
-		 	Simulator simulator = new DefaultSimulator(protocol);
-	 		String result = (String)respond.invoke(injectedObject, simulator, "000:hello I'm 000");
-	 		System.out.println("repond returns: " + result);
-	 		result = (String)report.invoke(injectedObject, simulator);
-	 		System.out.println("report returns: " + result);
-	 	}
-	 	catch(Exception e) {
-	 		e.printStackTrace();
-	 	}
-	 	*/
+		// if(javaCompiler == null) return ; 
+		// String classpath = System.getProperty("user.dir") + "\\build";
+		// // System.out.println("Target classpath: " + classpath);
+		// int compileStatus = javaCompiler.run(null, null, null, "-d", classpath , name );
+		// if(compileStatus != 0) {
+		// 	System.out.println("Compilation broke");
+		// }
+	 // 	try {
+	 // 		Class injectedClass = Class.forName("crowd.MyTest");
+		//  	Object injectedObject = injectedClass.newInstance();
+		//  	Method respond = injectedClass.getDeclaredMethod("respond", Simulator.class, String.class);
+		//  	Method report = injectedClass.getDeclaredMethod("report", Simulator.class);
+		//  	Protocol protocol = new DefaultProtocol();
+		//  	Simulator simulator = new DefaultSimulator(protocol);
+	 // 		String result = (String)respond.invoke(injectedObject, simulator, "000:hello I'm 000");
+	 // 		System.out.println("repond returns: " + result);
+	 // 		result = (String)report.invoke(injectedObject, simulator);
+	 // 		System.out.println("report returns: " + result);
+	 // 	}
+	 // 	catch(Exception e) {
+	 // 		e.printStackTrace();
+	 // 	}
 	}
 	@Override
 	public void run() {

@@ -1,0 +1,8 @@
+.message{
+  -fx-background-color: linear-gradient(to right,#00fffc,#fff600);
+  -fx-background-radius: 25;
+  -fx-border-radius: 25;
+}
+.vmask{
+  -fx-fill: rgba(255,255,255,1);
+}

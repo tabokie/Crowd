@@ -19,13 +19,13 @@ public class Simulator extends Buildable {
 	private EventScheduler scheduler = new RealtimeEventScheduler();
 	public Simulator() {
 		super();
-	} // fallback
+	}
 	public Simulator(App parent) {
 		super(parent);
 	}
 	public App build() {
 		scheduler.start();
-		scheduler.close();
+		// scheduler.close();
 		return parent;
 	}
 	// builder
@@ -76,7 +76,7 @@ public class Simulator extends Buildable {
 		Map<String, Object> datas = getDatas(node);
 		datas.put(name, data);
 	}
-	public Map<String, Object> addNode(String name, String type) {
+	private Map<String, Object> addNode(String name, String type) {
 		Map<String, Object> datas = new ConcurrentHashMap<String, Object>();
 		nodeState.put(name, datas);
 		datas.put("type", type);

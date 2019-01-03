@@ -10,6 +10,7 @@ import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
 
+// gradient is independent from target
 public class AnimatedRadialGradient {
 	private Shape target;
 	private DoubleProperty radiusProperty = new SimpleDoubleProperty(0);
