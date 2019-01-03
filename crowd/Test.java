@@ -53,52 +53,6 @@ public class Test extends Thread{
 		}
 		return ret;
 	}
-	public static Test NewScheduleTest() {
-		Test ret = new Test() {
-			@Override
-			public void run() {
-				DiscreteEventScheduler scheduler = new DiscreteEventScheduler();
-				scheduler.enqueue(0, (Actor actor) -> {
-					System.out.println("A running");
-					actor.act(1, () -> {
-						System.out.println("A.1 done");
-					});
-					actor.act(2, () -> {
-						System.out.println("A.2 done");
-					});
-				});
-				scheduler.enqueue(0, (Actor actor) -> {
-					System.out.println("B running");
-					actor.act(1, () -> {
-						System.out.println("B.1 done");
-					});
-					actor.act(10, () -> {
-						System.out.println("B.10 done");
-					});
-				});
-
-				scheduler.start();
-				scheduler.close();
-			}
-		};
-		return ret;
-	}
-	public static Test NewSimulateTest() {
-		Test ret = new Test() {
-			@Override
-			public void run() {
-				Simulator simulator = new Simulator();
-				simulator.addPrototype("echo", new EchoPrototype());
-				Map<String, Object> datas = simulator.addNode("left", "echo");
-				datas.put("target", "right");
-				datas.put("count", new AtomicInteger(0));
-				simulator.addNode("right", "echo").put("count", new AtomicInteger(0));
-				simulator.startNode("left");
-				simulator.run();
-			}
-		};
-		return ret;
-	}
 
 	public static void feed(Predicate<String> consumer) {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in)) ;
@@ -124,14 +78,7 @@ public class Test extends Thread{
 					return true;
 				});
 			}
-			else if(args[0].equals("schedule")) {
-				Test instance = NewScheduleTest();
-				instance.run();
-			}
-			else if(args[0].equals("simulate")) {
-				Test instance = NewSimulateTest();
-				instance.run();
-			}
+
 		}
 
 	}

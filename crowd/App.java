@@ -47,6 +47,11 @@ public class App extends Application {
 	public Simulator createSimulator() {
 		return new Simulator(this);
 	}
+	public <T extends Buildable> T createBuildable(Class<T> cls) throws Exception{
+		T instance = cls.newInstance();
+		instance.bind(this);
+		return instance;
+	}
 	@Override
   public void start(Stage primaryStage) {
   	if(container != null) {
@@ -60,8 +65,9 @@ public class App extends Application {
     primaryStage.show();
   }
   @Override
-  public void init() {
-  	createContainer().loadDefault().build();
+  public void init() throws Exception {
+  	createBuildable(Container.class).loadDefault().build();
+  	// createContainer().loadDefault().build();
   }
   public static void main(String[] args) {
   	launch(args);

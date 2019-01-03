@@ -20,8 +20,7 @@ import javafx.beans.value.*;
 import crowd.App;
 import crowd.Buildable;
 
-public class Container implements Buildable{
-	private App parent;
+public class Container extends Buildable{
 	private Pane pane;
 	private static void handleCommand(WorkFlow flow, String command) {
     if(command != null && !command.isEmpty() && flow != null) {
@@ -106,7 +105,10 @@ public class Container implements Buildable{
     return ret;
 	}
 	public Container(App parent) {
-		this.parent = parent;
+		super(parent);
+	}
+	public Container() {
+		super();
 	}
 	public Pane getPane() {
 		return pane;

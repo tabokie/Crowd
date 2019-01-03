@@ -11,19 +11,21 @@ import crowd.App;
 import crowd.Buildable;
 import crowd.ui.*;
 
-public class Simulator extends Thread implements Buildable {
+public class Simulator extends Buildable {
 	// private static Protocol defaultProtocol = new DefaultProtocol();
 	// private Protocol protocol = null;
-	private App parent;
 	private Map<String, Prototype> prototypes = new ConcurrentHashMap<String, Prototype>();
 	private Map<String, Map<String, Object>> nodeState = new ConcurrentHashMap<String, Map<String, Object>>();
 	private EventScheduler scheduler = new RealtimeEventScheduler();
-	public Simulator() { } // fallback
+	public Simulator() {
+		super();
+	} // fallback
 	public Simulator(App parent) {
-		this.parent = parent;
+		super(parent);
 	}
 	public App build() {
-		start();
+		scheduler.start();
+		scheduler.close();
 		return parent;
 	}
 	// builder
@@ -96,12 +98,6 @@ public class Simulator extends Thread implements Buildable {
 			});
 		}
 	}
-	@Override
-	public void run() {
-		scheduler.start();
-		scheduler.close();
-	}
-
 	public void send(String fromNode, String toNode, String message) {
 		String type = getData(toNode, "type");
 		if(type == null) return ;
