@@ -1,7 +1,6 @@
-package crowd;
+package crowd.ui;
 
 import java.util.*;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
@@ -17,16 +16,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.layout.Background;
 import javafx.beans.value.*;
-import crowd.ui.*;
 
-// 2-dimentional workflow
-// distributed replication using round visualization
+import crowd.App;
+import crowd.Buildable;
 
-public class Monitor extends Application {
-  BorderPane pane = null;
-  Pane contentPane = null;
-  public static WorkFlow flow = null;
-  private void handleCommand(String command) {
+public class Container implements Buildable{
+	private App parent;
+	private Pane pane;
+	private static void handleCommand(WorkFlow flow, String command) {
     if(command != null && !command.isEmpty() && flow != null) {
       String[] tokens = command.split(" ");
       if(tokens[0].equals("gclaim")) { // group name ...
@@ -42,8 +39,8 @@ public class Monitor extends Application {
         flow.connectNode(tokens[1], tokens[2]);
       }
       else if(tokens[0].equals("clear")) {
-        contentPane.getChildren().clear();
-        flow = new WorkFlow(contentPane, new Vec2f(0,0), new Vec2f(800,400));
+      	// not implemented
+      	flow.clear();
       }
       else if(tokens[0].equals("check")) {
         flow.report();
@@ -62,17 +59,9 @@ public class Monitor extends Application {
     }
     return ;
   }
-
-  public void start(Stage primaryStage) {
-    pane = new BorderPane();
-    pane.setBackground(Background.EMPTY);
-    contentPane = new Pane();
-    contentPane.setMaxSize(1920, 1080);
-    // contentPane.setPrefSize(800, 400); // is auto updated by children's position
-
-    flow = new WorkFlow(contentPane, new Vec2f(0, 0), new Vec2f(800, 400));
-    // flow.newGroup("1.0",null);
-    // flow.newGroup("1.1",null);
+	private static Pane defaultLayout(Pane content, WorkFlow flow) {
+		BorderPane ret = new BorderPane();
+    ret.setBackground(Background.EMPTY);
 
     Button submit = new Button("submit");
     submit.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -81,7 +70,7 @@ public class Monitor extends Application {
       @Override
       public void handle(KeyEvent event) {
         if(event.getCode() == KeyCode.ENTER) {
-          handleCommand(textField.getText());
+          handleCommand(flow, textField.getText());
         }
       }
     });
@@ -94,38 +83,40 @@ public class Monitor extends Application {
     submit.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        handleCommand(textField.getText());
+        handleCommand(flow, textField.getText());
       }
     });
     final double widgetHeight = 30;
     box.setMinHeight(widgetHeight);
-    pane.setTop(contentPane);
-    pane.setBottom(box);
+    ret.setTop(content);
+    ret.setBottom(box);
 
-    pane.heightProperty().addListener(new ChangeListener(){
+    ret.heightProperty().addListener(new ChangeListener(){
       @Override
       public void changed(ObservableValue obj, Object oldVal, Object newVal) {
         flow.updateHeight((double)newVal - widgetHeight);
       }
     });
-    pane.widthProperty().addListener(new ChangeListener(){
+    ret.widthProperty().addListener(new ChangeListener(){
       @Override
       public void changed(ObservableValue obj, Object oldVal, Object newVal) {
         flow.updateWidth((double)newVal);
       }
     });
-
-
-    Scene scene =new Scene(pane,800,400);
-    primaryStage.setTitle("Crowd");
-    primaryStage.setScene(scene);
-    primaryStage.show();
-
-    Test testCase = Test.NewSimulateTest();
-    testCase.start();
-  }
-  public static void main(String[] args) {
-    launch(args); // blocking start
-  }
+    return ret;
+	}
+	public Container(App parent) {
+		this.parent = parent;
+	}
+	public Pane getPane() {
+		return pane;
+	}
+	public Container loadDefault() {
+		pane = defaultLayout(parent.getContentPane(), parent.getFlow());
+		return this;
+	}
+	public App build() {
+		parent.setContainer(this);
+		return parent;
+	}
 }
-

@@ -5,29 +5,57 @@ import java.util.*;
 
 import javafx.application.Platform;
 
-import crowd.*;
+// import crowd.util.Pair;
+import javafx.util.Pair;
+import crowd.App;
+import crowd.Buildable;
 import crowd.ui.*;
 
-public class Simulator extends Thread {
-	private static Protocol defaultProtocol = new DefaultProtocol();
-	private Protocol protocol = null;
+public class Simulator extends Thread implements Buildable {
+	// private static Protocol defaultProtocol = new DefaultProtocol();
+	// private Protocol protocol = null;
+	private App parent;
 	private Map<String, Prototype> prototypes = new ConcurrentHashMap<String, Prototype>();
 	private Map<String, Map<String, Object>> nodeState = new ConcurrentHashMap<String, Map<String, Object>>();
 	private EventScheduler scheduler = new RealtimeEventScheduler();
-	public Simulator (Protocol p) {
-		this.protocol = p;
+	public Simulator() { } // fallback
+	public Simulator(App parent) {
+		this.parent = parent;
 	}
-	public Simulator() { }
+	public App build() {
+		start();
+		return parent;
+	}
+	// builder
+	public Simulator addPrototype(String type, Prototype prototype) {
+		prototypes.put(type, prototype);
+		return this;
+	}
+	public Simulator setStartup(String... list) {
+		for(int i = 0; i < list.length; i++) {
+			String name = list[i];
+			String type = getData(name, "type");
+			if(type == null) return this;
+			Prototype node = prototypes.get(type);
+			node.start(name, this); // only push to queue
+			if(parent.getFlow() != null) {
+				Platform.runLater(()->{
+					parent.getFlow().precedeGroup(name, getData(name, "target"));
+				});
+			}
+		}
+		return this;
+	}
+	public Simulator addNode(String name, String type, Pair<String, Object>... kvs) {
+		Map<String, Object> state = addNode(name, type);
+		for(int i = 0; i < kvs.length; i++) {
+			state.put(kvs[i].getKey(), kvs[i].getValue());
+		}
+		return this;
+	}
 	// Accessors
 	public EventScheduler getScheduler() {
 		return scheduler;
-	}
-	public void setProtocol(Protocol protocol) {
-		this.protocol = protocol;
-	}
-	public Protocol getProtocol() { // node may leverage on central protocol
-		if(protocol == null) return defaultProtocol;
-		return protocol;
 	}
 	public Map<String, Object> getDatas(String node) {
 		Map<String, Object> datas = nodeState.get(node);
@@ -46,17 +74,13 @@ public class Simulator extends Thread {
 		Map<String, Object> datas = getDatas(node);
 		datas.put(name, data);
 	}
-
-	public void addPrototype(String type, Prototype prototype) {
-		prototypes.put(type, prototype);
-	}
 	public Map<String, Object> addNode(String name, String type) {
 		Map<String, Object> datas = new ConcurrentHashMap<String, Object>();
 		nodeState.put(name, datas);
 		datas.put("type", type);
-		if(Monitor.flow != null) {
+		if(parent.getFlow() != null) {
 			Platform.runLater(()->{
-				Monitor.flow.newGroup(name);
+				parent.getFlow().newGroup(name);
 			});
 		}
 		return datas;
@@ -66,9 +90,9 @@ public class Simulator extends Thread {
 		if(type == null) return ;
 		Prototype node = prototypes.get(type);
 		node.start(name, this);
-		if(Monitor.flow != null) {
+		if(parent.getFlow() != null) {
 			Platform.runLater(()->{
-				Monitor.flow.precedeGroup(name, getData(name, "target"));
+				parent.getFlow().precedeGroup(name, getData(name, "target"));
 			});
 		}
 	}
@@ -84,9 +108,9 @@ public class Simulator extends Thread {
 		Prototype node = prototypes.get(type);
 		if(node == null) return;
 		node.receive(toNode, this, fromNode, message);
-		if(Monitor.flow != null) {
+		if(parent.getFlow() != null) {
 			Platform.runLater(()->{
-				Monitor.flow.setStroke(fromNode, toNode, 0);
+				parent.getFlow().setStroke(fromNode, toNode, 0);
 			});
 		}
 	}

@@ -28,6 +28,12 @@ public class WorkFlow { // not thread safe
 		origin.copy(o);
 		canvas.copy(size);
 	}
+	public void clear() {
+		pane.getChildren().clear();
+		flow.clear();
+		nodes.clear();
+		groups.clear();
+	}
 	public void updateWidth(double w) {
 		canvas.data[0] = (float) w;
 		updateLayout();
@@ -65,7 +71,6 @@ public class WorkFlow { // not thread safe
 	}
 	// public interface will update layout at the end
 	public String newGroup(String name) {
-		System.out.println("New group: " + name);
 		return newGroup(name, null);
 	}
 	public String newGroup(String name, String[] requisite) {
@@ -197,6 +202,7 @@ public class WorkFlow { // not thread safe
 				flow.add(new ArrayList<GroupNode>());
 			}
 			flow.get(fromNode.getLevel() + 1).add(toNode);
+			toNode.setLevel(fromNode.getLevel() + 1);
 		}
 		else if(fromNode.getLevel() > toNode.getLevel()) {
 			GroupNode tmp = fromNode;
@@ -212,10 +218,10 @@ public class WorkFlow { // not thread safe
 			dummy.fromLink(dummyLink);
 			fromNode = dummy;
 		}
-		updateLayout();
 		GroupLink link = GroupLink.NewLink(pane);
 		fromNode.toLink(link);
 		toNode.fromLink(link);
+		updateLayout();
 	}
 	private void insertGroup(GroupNode group, String[] precedentGroup) {
 		int min = 0;
