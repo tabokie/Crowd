@@ -16,17 +16,21 @@ import javafx.application.Platform;
  */
 public class WorkFlow { // not thread safe
 	private List<List<GroupNode>> flow = new ArrayList<List<GroupNode>>();
-	private Map<String, Node> nodes = new HashMap<String, Node>();
+	private Map<String, ChildNode> nodes = new HashMap<String, ChildNode>();
 	private Map<String, GroupNode> groups = new HashMap<String, GroupNode>();
 	private Vec2f origin = new Vec2f();
 	private Vec2f canvas = new Vec2f();
 	private Pane pane;
 	private final static float minMarginOfWidth = 0.07f;
 	private final static float minHeaderOfWidth = 0.05f;
-	public WorkFlow(Pane p, Vec2f o, Vec2f size) {
-		pane = p;
+	public WorkFlow(Vec2f o, Vec2f size) {
+		pane = new Pane();
+		pane.setMaxSize(1920, 1080);
 		origin.copy(o);
 		canvas.copy(size);
+	}
+	public Pane getPane() {
+		return pane;
 	}
 	public void clear() {
 		pane.getChildren().clear();
@@ -94,9 +98,9 @@ public class WorkFlow { // not thread safe
 	public String newNode(String name, String belongToGroup) {
 		GroupNode group = groups.get(belongToGroup);
 		if(group == null) return new String("can't find group named " + belongToGroup );
-		Node node = nodes.get(name);
+		ChildNode node = nodes.get(name);
 		if(node != null) return new String("find duplicated node named " + name);
-		node = new Node(pane, group, name);
+		node = new ChildNode(pane, group, name);
 		nodes.put(name, node);
 		nextFrame(group, 2000);
 		return null;
@@ -109,13 +113,13 @@ public class WorkFlow { // not thread safe
 		return null;
 	}
 	public String connectNode(String fromName, String toName) {
-		Node fromNode = nodes.get(fromName);
-		Node toNode = nodes.get(toName);
+		ChildNode fromNode = nodes.get(fromName);
+		ChildNode toNode = nodes.get(toName);
 		if(fromNode == null || toNode == null ) return new String("can't find node to connect");
 		if(fromNode.getParent() == toNode.getParent() ) {
 			// fromNode.getParent().connectNode(fromNode, toNode);
 			// nextFrame(fromNode.getParent(), 2000);
-			NodeLink link = null;
+			ChildLink link = null;
 			List<KeyValue> kvs = new ArrayList<KeyValue>();
 			if((link = fromNode.getOut(toName)) != null) {
 				link.start(Color.GREEN, kvs);

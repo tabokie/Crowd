@@ -15,9 +15,9 @@ import javafx.animation.*;
 
 public class GroupNode {
 	// manager of nodes
-	private List<Node> members = new ArrayList<Node>();
+	private List<ChildNode> members = new ArrayList<ChildNode>();
 	private Vec2f position = new Vec2f(-1, -1);
-	private Node center = null;
+	private ChildNode center = null;
 	// as member of GroupNode
 	private Circle vcenter = new Circle();
 	// public Circle halo = new Circle();
@@ -117,16 +117,16 @@ public class GroupNode {
 		to.add(link);
 		link.speculateStart(getSpeculativeCenterX(), getSpeculativeCenterY());
 	}
-	public void addMember(Node node) {
+	public void addMember(ChildNode node) {
 		if(node != null) {
 			members.add(node);
 			speculateNodes();
 		}
 	}
-	public void connectNode(Node a, Node b, List<KeyValue> kvs) { // from little end to higher end
+	public void connectNode(ChildNode a, ChildNode b, List<KeyValue> kvs) { // from little end to higher end
 		if(pane == null) return ;
-		Node fromNode = null;
-		Node toNode = null;
+		ChildNode fromNode = null;
+		ChildNode toNode = null;
 		int na = members.indexOf(a);
 		int nb = members.indexOf(b);
 		if(na < 0 || nb < 0) return ;
@@ -140,7 +140,7 @@ public class GroupNode {
 			fromNode = b;
 			toNode = a;
 		}
-		NodeLink link = NodeLink.NewLink(pane);
+		ChildLink link = ChildLink.NewLink(pane);
 		fromNode.toLink(link);
 		toNode.fromLink(link);
 		if(a == fromNode) {
@@ -155,7 +155,7 @@ public class GroupNode {
 		float total = members.size();
 		float radius = initialRadius + (float)Math.sqrt(total) * initialRadius * 0.5f;
 		float cur = 0;
-		for(Node node : members ) {
+		for(ChildNode node : members ) {
 			float half = 1.0f / total * (float)Math.PI;
 			node.speculateCenter(position.data[0] + radius * (float)Math.cos(cur + half), 
 				position.data[1] + radius * (float)Math.sin(cur + half));
@@ -224,7 +224,7 @@ public class GroupNode {
 		for(GroupLink link : to) {
 			link.exportSpeculativeState(kvs);
 		}
-		for(Node node: members) {
+		for(ChildNode node: members) {
 			node.exportSpeculativeState(kvs);
 		}
 	}

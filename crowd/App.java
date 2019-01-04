@@ -8,6 +8,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
@@ -23,21 +25,30 @@ import crowd.concurrent.*;
 import crowd.util.*;
 
 public class App extends Application {
-	private WorkFlow flow;
-	private Pane contentPane;
+	private WorkFlow flow = null;
+	private ChatBox chatbox = null;
 	private Container container;
 	private Scene scene;
-	public Pane getContentPane() {
-		return contentPane;
+	public Pane getWorkflowPane() {
+		return flow.getPane();
+	}
+	public Node getChatboxNode() {
+		return chatbox.getNode();
 	}
 	public WorkFlow getFlow() {
 		return flow;
 	}
-	public App() {
-		contentPane = new Pane();
-		contentPane.setMaxSize(1920, 1080);
-		flow = new WorkFlow(contentPane, new Vec2f(0,0), new Vec2f(800, 400));
-		createContainer().loadDefault().build();
+	public ChatBox getChatbox() {
+		return chatbox;
+	}
+	public App() { }
+	public App buildWorkflow() {
+		flow = new WorkFlow(new Vec2f(0,0), new Vec2f(800, 400));
+		return this;
+	}
+	public App buildChatbox() {
+		chatbox = new ChatBox();
+		return this;
 	}
 	public Container createContainer() {
 		container = new Container(this);
@@ -64,7 +75,7 @@ public class App extends Application {
 	@Override
   public void start(Stage primaryStage) {
   	if(scene == null) {
-  		scene = new Scene(contentPane, 800, 400);
+  		scene = new Scene(flow.getPane(), 800, 400);
   	}
     primaryStage.setTitle("Crowd");
     primaryStage.setScene(scene);
@@ -72,8 +83,7 @@ public class App extends Application {
   }
   @Override
   public void init() throws Exception {
-  	createBuildable(Container.class).loadChatbox().build();
-  	// createContainer().loadDefault().build();
+  	buildWorkflow().buildChatbox().createBuildable(Container.class).loadChatbox().build();
   }
   public static void main(String[] args) {
   	launch(args);

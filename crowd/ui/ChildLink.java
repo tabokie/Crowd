@@ -7,7 +7,7 @@ import javafx.scene.layout.Pane;
 
 import java.util.*;
 
-public class NodeLink {
+public class ChildLink {
 	public String fromNode;
 	public String toNode;
 	public Arc curve;
@@ -16,17 +16,17 @@ public class NodeLink {
 	public Vec2f centerPoint = new Vec2f();
 	private boolean speculativeStateReady = false;
 	private final static float initialStrokeWidth = 0.4f;
-	NodeLink(Arc c) {
+	ChildLink(Arc c) {
 		curve = c;
 	}
-	public static NodeLink NewLink(Pane pane) {
+	public static ChildLink NewLink(Pane pane) {
 		Arc curve = new Arc();
     // curve.setStroke(Color.DIMGRAY); 
     // curve.setStrokeWidth(initialStrokeWidth); 
     curve.setStrokeWidth(0);
     curve.setFill(Color.TRANSPARENT);
     pane.getChildren().add(curve);
-    return new NodeLink(curve);
+    return new ChildLink(curve);
 	}
 	public float getStartX() {
 		float x = (float)curve.getCenterX();
@@ -54,7 +54,7 @@ public class NodeLink {
 	}
 	private float timeToLive = -1;
 	public void setEnd(float x, float y, float cx, float cy) {
-		solveNodeLink(curve, getStartX(), getStartY(), x, y, cx, cy);
+		solveChildLink(curve, getStartX(), getStartY(), x, y, cx, cy);
 		toPoint.data[0] = x;
 		toPoint.data[1] = y;
 		centerPoint.data[0] = cx;
@@ -62,7 +62,7 @@ public class NodeLink {
 		timeToLive = 2000;
 	}
 	public void setStart(float x, float y, float cx, float cy) {
-		solveNodeLink(curve, x, y, getEndX(), getEndY(), cx, cy);
+		solveChildLink(curve, x, y, getEndX(), getEndY(), cx, cy);
 		fromPoint.data[0] = x;
 		fromPoint.data[1] = y;
 		centerPoint.data[0] = cx;
@@ -103,7 +103,7 @@ public class NodeLink {
 	}
 	public void exportSpeculativeState(List<KeyValue> kvs) {
 		if(speculativeStateReady){
-			solveNodeLink(curve, 
+			solveChildLink(curve, 
 				getSpeculativeStartX(), getSpeculativeStartY(), 
 				getSpeculativeEndX(), getSpeculativeEndY(), 
 				getSpeculativeCenterX(), getSpeculativeCenterY(),
@@ -117,7 +117,7 @@ public class NodeLink {
 	}
 	public void start(Color color, List<KeyValue> kvs) {
 		if(speculativeStateReady){ // fix position
-			solveNodeLink(curve, 
+			solveChildLink(curve, 
 				getSpeculativeStartX(), getSpeculativeStartY(), 
 				getSpeculativeEndX(), getSpeculativeEndY(), 
 				getSpeculativeCenterX(), getSpeculativeCenterY(),
@@ -129,7 +129,7 @@ public class NodeLink {
 		curve.setStroke(color);
 		kvs.add(new KeyValue(curve.strokeWidthProperty(), 0));
 	}
-	static public void solveNodeLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy) { // clockwise ?
+	static public void solveChildLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy) { // clockwise ?
 		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
 		float w1 = ax * (cx-ax) + ay * (cy-ay);
 		float w2 = cx * (bx-ax) + cy * (by-ay);
@@ -155,7 +155,7 @@ public class NodeLink {
 		float length = (float)Math.atan(oldRadius / newRadius) * 2;
 		c.setLength(Math.toDegrees(length));
 	}
-	static public void solveNodeLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy, List<KeyValue> kvs) {
+	static public void solveChildLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy, List<KeyValue> kvs) {
 		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
 		float w1 = ax * (cx-ax) + ay * (cy-ay);
 		float w2 = cx * (bx-ax) + cy * (by-ay);

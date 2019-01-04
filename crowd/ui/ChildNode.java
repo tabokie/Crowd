@@ -10,16 +10,16 @@ import javafx.animation.KeyValue;
 
 import java.util.*;
 
-public class Node {
+public class ChildNode {
 	private Vec2f position = new Vec2f(-1, -1);
 	public Circle self = new Circle() ;
 	private GroupNode parent;
 	private Pane pane;
 	private String id;
-	private List<NodeLink> from = new ArrayList<NodeLink>();
-	private List<NodeLink> to = new ArrayList<NodeLink>();
+	private List<ChildLink> from = new ArrayList<ChildLink>();
+	private List<ChildLink> to = new ArrayList<ChildLink>();
 
-	Node(Pane p, GroupNode group, String name) {
+	ChildNode(Pane p, GroupNode group, String name) {
 		parent = group;
 		pane = p;
 		id = name;
@@ -54,10 +54,10 @@ public class Node {
 			self.setCenterY(y);
 		}
 		else {
-			for(NodeLink link: from) {
+			for(ChildLink link: from) {
 				link.speculateEnd(x, y, parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 			}
-			for(NodeLink link: to) {
+			for(ChildLink link: to) {
 				link.speculateStart(x, y, parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 			}
 			speculativeStateReady = true;
@@ -70,36 +70,36 @@ public class Node {
 			appendList.add(new KeyValue(self.centerXProperty(), getSpeculativeCenterX()));
 			appendList.add(new KeyValue(self.centerYProperty(), getSpeculativeCenterY()));
 		}
-		for(NodeLink link: from) {
+		for(ChildLink link: from) {
 			link.exportSpeculativeState(appendList);
 		}
-		for(NodeLink link: to) {
+		for(ChildLink link: to) {
 			link.exportSpeculativeState(appendList);
 		}
 		speculativeStateReady = false;
 	}
-	public void fromLink(NodeLink link) {
+	public void fromLink(ChildLink link) {
 		from.add(link);
 		link.toNode = id;
 		link.setEnd(getCenterX(), getCenterY(), parent.getCenterX(), parent.getCenterY());
 		link.speculateEnd(getSpeculativeCenterX(), getSpeculativeCenterY(), parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 	}
-	public void toLink(NodeLink link) {
+	public void toLink(ChildLink link) {
 		to.add(link);
 		link.fromNode = id;
 		link.setStart(getCenterX(), getCenterY(), parent.getCenterX(), parent.getCenterY());
 		link.speculateStart(getSpeculativeCenterX(), getSpeculativeCenterY(), parent.getSpeculativeCenterX(), parent.getSpeculativeCenterY());
 	}
-	public NodeLink getOut(String id) {
-		for(NodeLink li : to) {
+	public ChildLink getOut(String id) {
+		for(ChildLink li : to) {
 			if(li.toNode.equals(id)){
 				return li;
 			}
 		}
 		return null;
 	}
-	public NodeLink getIn(String id) {
-		for(NodeLink li : from) {
+	public ChildLink getIn(String id) {
+		for(ChildLink li : from) {
 			if(li.fromNode.equals(id)){
 				return li;
 			}
