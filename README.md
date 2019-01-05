@@ -18,6 +18,33 @@ Here is a screenshot of alpha version UI:
 
 ![alpha screenshot](docs/img/screenshot.png)
 
+### Create Your Own
+
+Other than standalone UI widget, user can build up customized application in one line, (due to JavaFX restriction, dynamic building is not yet supported).
+
+Overwrite the init method in App template and launch your app:
+
+```Java
+package crowd;
+
+public class MyApp extends App {
+  @Override
+  public void init() throws Exception {
+    this.buildWorkflow().buildChatbox()
+    .createContainer().loadChatbox().build()
+    .createSimulator()
+    .addPrototype("mytype", (Prototype) JavaRuntime.LoadObjectFromResource("MyPrototype"))
+    .addNode("home", "mytype", new Pair("days", new AtomicInteger(0)), new Pair("name", "China"))
+    .addNode("school", "mytype", new Pair("name", "ZJU"))
+    .setStartup("home")
+    .build();
+  }
+  public static void main(String[] args) {
+    launch(args);
+  }
+}
+```
+
 ## Crowd Simulator
 
 Hands on distributed system with minimum coding required.

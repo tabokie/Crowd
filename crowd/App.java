@@ -19,21 +19,29 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.layout.Background;
 import javafx.beans.value.*;
+import javafx.application.Platform;
 
 import crowd.ui.*;
 import crowd.concurrent.*;
 import crowd.util.*;
+import crowd.port.*;
 
 public class App extends Application {
+	private String name = "";
 	private WorkFlow flow = null;
 	private ChatBox chatbox = null;
 	private Container container;
 	private Scene scene;
-	public Pane getWorkflowPane() {
-		return flow.getPane();
+	private final static Protocol defaultProtocol = new DefaultProtocol();
+	private Protocol protocol = null;
+	private List<OPort> oports = new ArrayList<OPort>();
+	public App() { }
+	// accessors
+	public String getName() {
+		return name;
 	}
-	public Node getChatboxNode() {
-		return chatbox.getNode();
+	public void setName(String n) {
+		name = n;
 	}
 	public WorkFlow getFlow() {
 		return flow;
@@ -41,7 +49,11 @@ public class App extends Application {
 	public ChatBox getChatbox() {
 		return chatbox;
 	}
-	public App() { }
+	public Protocol getProtocol() {
+		if(protocol == null) return defaultProtocol;
+		return protocol;
+	}
+	// builders
 	public App buildWorkflow() {
 		flow = new WorkFlow(new Vec2f(0,0), new Vec2f(800, 400));
 		return this;
@@ -50,7 +62,7 @@ public class App extends Application {
 		chatbox = new ChatBox();
 		return this;
 	}
-	public Container createContainer() {
+	public Container buildContainer() {
 		container = new Container(this);
 		return container;
 	}
@@ -64,14 +76,24 @@ public class App extends Application {
 			scene.getStylesheets().add(path);
 		}
 	}
-	public Simulator createSimulator() {
+	public Simulator buildSimulator() {
 		return new Simulator(this);
 	}
-	public <T extends Buildable> T createBuildable(Class<T> cls) throws Exception{
-		T instance = cls.newInstance();
-		instance.bind(this);
-		return instance;
+	public <T extends Buildable> T build(Class<T> cls) {
+		try {
+			T instance = cls.newInstance();
+			instance.bind(this);	
+			return instance;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
+	public void addOPort(OPort port) {
+		oports.add(port);
+	}
+	// runtime
 	@Override
   public void start(Stage primaryStage) {
   	if(scene == null) {
@@ -83,8 +105,36 @@ public class App extends Application {
   }
   @Override
   public void init() throws Exception {
-  	buildWorkflow().buildChatbox().createBuildable(Container.class).loadChatbox().build();
+  	setName("app");
+  	buildWorkflow().buildChatbox().build(Container.class).loadCompact().build();
   }
+  // input from user or network
+  public void input(String message) {
+  	if(protocol == null) protocol = defaultProtocol;
+  	Command cmd = protocol.parse(message);
+  	Platform.runLater(()->{
+			if(cmd == null ) {
+	  		chatbox.Add("an invalid command", true);
+	  	} else if(cmd.raiser.length() == 0) {
+	  		chatbox.Add("user" + message, true);
+	  	} else {
+	  		chatbox.Add(message, false);
+	  	}
+  	});
+  	
+  	if(cmd != null)
+  		input(cmd);
+  }
+  public void input(Command cmd) {
+  	cmd.dispatch(this);
+  }
+  public void output(String target, String message) {
+  	for(OPort port : oports) {
+  		port.send(target, message);
+  	}
+  }
+
+  // entry
   public static void main(String[] args) {
   	launch(args);
   }

@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 public class ChatBox {
 	private ScrollPane pane;
 	private VBox messageHolder;
+	private int capacity = 0;
 	public ChatBox() {
 		build();
 	}
@@ -65,15 +66,33 @@ public class ChatBox {
 		messageHolder.layout();
     pane.setVvalue(pane.getVmax());
 	}
+	public void SetCapacity(int count) {
+		capacity = count;
+	}
+	public void Retain(int capacity) { // make sure <= capacity
+		int cur = messageHolder.getChildren().size();
+		if(cur > capacity) {
+			messageHolder.getChildren().remove(0, cur - capacity);
+		}
+	}
 	public void Add(String message, boolean rightAligned) {
+		if(capacity > 0) {
+			Retain(capacity - 1);
+		}
 		Button btn = new Button(message);
-		btn.setStyle("-fx-background-color: linear-gradient(to right,#00fffc,#fff600);"+
-			"-fx-background-radius: 25;"+
-  		"-fx-border-radius: 25;");
+		if(rightAligned) {
+			btn.setStyle("-fx-background-color: linear-gradient(to right,#4fc1e9,#3bafda);"+
+				"-fx-background-radius: 15;"+
+	  		"-fx-border-radius: 15;");	
+		} else {
+			btn.setStyle("-fx-background-color: linear-gradient(to right,#f5f7fa,#e6e9ed);"+
+				"-fx-background-radius: 15;"+
+	  		"-fx-border-radius: 15;");	
+		}
 		messageHolder.getChildren().add(btn);
 		messageHolder.applyCss();
 		messageHolder.layout();
-		if(rightAligned && messageHolder.getChildren().size() %2 == 0) {
+		if(rightAligned) {
 			final double btnWidth = btn.getWidth() + 12 + 13; // + padding + MAGIC
 			double leftMargin = messageHolder.getWidth() - btnWidth;
 			messageHolder.setMargin(btn, new Insets(0,0,0, leftMargin));

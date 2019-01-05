@@ -10,9 +10,10 @@ import crowd.concurrent.Prototype;
 public class SimulatorApp extends App {
 	@Override
 	public void init() throws Exception {
+		this.setName("simulator");
 		this.buildWorkflow()
-		.createContainer().loadDefault().build()
-		.createSimulator()
+		.buildContainer().loadCompact().build()
+		.buildSimulator()
 		.addPrototype("echo", (Prototype) JavaRuntime.LoadObjectFromResource("DynamicPrototype"))
 		.addNode("left", "echo", new Pair("target", "right"), new Pair("count", new AtomicInteger(0)))
 		.addNode("right", "echo", new Pair("count", new AtomicInteger(0)))

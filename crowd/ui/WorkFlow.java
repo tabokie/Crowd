@@ -48,20 +48,6 @@ public class WorkFlow { // not thread safe
 		updateLayout();
 		nextFrame(10);
 	}
-	public void startConcurrentTest(int baseSize) {
-		for(int i = 0; i < 100; i ++) {
-			final int tmp = i;
-			Platform.runLater(()->{
-				this.newGroup("2." + String.valueOf(tmp), new String[]{"1." + String.valueOf(tmp % baseSize)});
-			});
-		}
-		for(int i = 0; i < 100; i ++) {
-			final int tmp = i;
-			Platform.runLater(()->{
-				this.newNode("n." + String.valueOf(tmp) , "2." + String.valueOf(tmp));
-			});
-		}
-	}
 	public void report() {
 		int level = 1;
 		for(List<GroupNode> list: flow) {
