@@ -62,10 +62,6 @@ public class App extends Application {
 		chatbox = new ChatBox();
 		return this;
 	}
-	public Container buildContainer() {
-		container = new Container(this);
-		return container;
-	}
 	public void setContainer(Container c) {
 		container = c; // overwrite
 		scene = new Scene(container.getPane(), 800, 400);
@@ -75,9 +71,6 @@ public class App extends Application {
 			String path = ResourceManager.getUnixFullPath(filename);
 			scene.getStylesheets().add(path);
 		}
-	}
-	public Simulator buildSimulator() {
-		return new Simulator(this);
 	}
 	public <T extends Buildable> T build(Class<T> cls) {
 		try {
@@ -106,7 +99,8 @@ public class App extends Application {
   @Override
   public void init() throws Exception {
   	setName("app");
-  	buildWorkflow().buildChatbox().build(Container.class).loadCompact().build();
+  	this.buildWorkflow().buildChatbox()
+  	.build(Container.class).loadCompact().build();
   }
   // input from user or network
   public void input(String message) {

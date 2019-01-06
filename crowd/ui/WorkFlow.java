@@ -98,7 +98,7 @@ public class WorkFlow { // not thread safe
 		nextFrame(2000);
 		return null;
 	}
-	public String connectNode(String fromName, String toName) {
+	public String connectNode(String fromName, String toName, String color) {
 		ChildNode fromNode = nodes.get(fromName);
 		ChildNode toNode = nodes.get(toName);
 		if(fromNode == null || toNode == null ) return new String("can't find node to connect");
@@ -119,12 +119,19 @@ public class WorkFlow { // not thread safe
 			nextFrame(kvs, 2000);
 		}
 		else {
-			precedeGroup(fromNode.getParent().getId(), toNode.getParent().getId());
-			nextFrame(2000);
+			List<KeyValue> kvs = new ArrayList<KeyValue>();
+			if(fromNode.getParent().getLevel() <= toNode.getParent().getLevel()) {
+				GroupLink li = fromNode.getParent().getOut(toNode.getParent().getId());
+				if(li != null) li.curve.startRipple(kvs);
+			} else {
+				GroupLink li = toNode.getParent().getOut(fromNode.getParent().getId());
+				if(li != null) li.curve.rstartRipple(kvs);
+			}
+			nextFrame(kvs, 2000);
 		}
 		return null;
 	}
-	public String setStroke(String groupId, String target, float width) {
+	public String setGroupLink(String groupId, String target, float width) {
 		GroupNode groupNode = groups.get(groupId);
 		if(groupNode == null) return new String("can't find group named " + groupId);
 		List<KeyValue> kvs = new ArrayList<KeyValue>();
@@ -140,7 +147,7 @@ public class WorkFlow { // not thread safe
 		nextFrame(kvs, 500);
 		return null;
 	}
-	public String setHalo(String groupId, float radius, float progress) {
+	public String setGroupHalo(String groupId, float radius, float progress) {
 		GroupNode groupNode = groups.get(groupId);
 		if(groupNode == null) return new String("can't find group named " + groupId);
 		// System.out.println("try to set halo of " + groupId + " with " + radius);
@@ -151,6 +158,7 @@ public class WorkFlow { // not thread safe
 		nextFrame(kvs, 2000);
 		return null;
 	}
+
 	private void nextFrame(KeyFrame frame, float millis) {
 		final Timeline timeline =  new Timeline();
 		timeline.getKeyFrames().add(frame);

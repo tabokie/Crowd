@@ -10,27 +10,30 @@ public class DefaultProtocol implements Protocol {
 		if(input != null && !input.isEmpty()) {
 			input = input.replaceFirst(":", " "); // raiser
       String[] tokens = input.split(" ");
-      if(tokens[1].equals("g")) { // group name ...
+      if(tokens[1].equals("group")) { // group name ...
         return new Command(tokens[0], Command.GROUP, 
         	(Object[])Arrays.copyOfRange(tokens, 2, tokens.length));
       }
-      else if(tokens[1].equals("n")) {
-        return new Command(tokens[0], Command.NODE, tokens[2], tokens[3]); // node name group
+      else if(tokens[1].equals("node")) {
+        return new Command(tokens[0], Command.NODE, tokens[2], tokens[3]); // name group
       }
       else if(tokens[1].equals("glink")) {
-        return new Command(tokens[0], Command.LINK, tokens[2], tokens[3]); // node name group
+        if(tokens.length > 4) {
+          return new Command(tokens[0], Command.LINK, tokens[2], tokens[3], Float.parseFloat(tokens[4])); // to from width
+        }
+        return new Command(tokens[0], Command.LINK, tokens[2], tokens[3]); // to from
       }
-      else if(tokens[1].equals("nlink")) {
-        return new Command(tokens[0], Command.SEND, tokens[2], tokens[3]); // node name group
+      else if(tokens[1].equals("send")) {
+        if(tokens.length > 5) {
+          return new Command(tokens[0], Command.SEND, tokens[2], tokens[3], tokens[4], tokens[5]); // from to message color
+        }
+        return new Command(tokens[0], Command.SEND, tokens[2], tokens[3], tokens[4]); // from to message
       }
       else if(tokens[1].equals("clear")) {
         return new Command(tokens[0], Command.RESET); // node name group
       }
-      else if(tokens[1].equals("server")) {
-      	return new Command(tokens[0], Command.REGISTER, tokens[2], tokens[3]); // name + ip:port
-      }
-      else if(tokens[1].equals("relay")) {
-      	return new Command(tokens[0], Command.COM, tokens[2], tokens[3]);
+      else if(tokens[1].equals("status")) {
+        return new Command(tokens[0], Command.STATUS, tokens[2], Float.parseFloat(tokens[3]), Float.parseFloat(tokens[4]) ); // name, radius, progress
       }
       else {
       	return new Command(tokens[0], Command.EMPTY, input.substring(input.indexOf(" ") + 1));

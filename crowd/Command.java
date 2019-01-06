@@ -11,13 +11,11 @@ public class Command {
 	public Object[] operands;
 	public static final int EMPTY = 0;
 	public static final int RESET = 1;
-	public static final int GROUP = 2;
-	public static final int NODE = 3;
-	public static final int LINK = 4; // between group
-	public static final int SEND = 5; // can apply force
+	public static final int GROUP = 2; // claim a group with precedants
+	public static final int NODE = 3; // claim a node with parent group
+	public static final int LINK = 4; // connect group, with force[Opt]
+	public static final int SEND = 5; // connect and send message to node, with force and color, could upgrade to group ui
 	public static final int STATUS = 6; // group progress
-	public static final int COM = 7; // communicate through monitor
-	public static final int REGISTER = 8; // communicate through monitor
 
 	public void dispatch(App app) {
 		final WorkFlow flow = app.getFlow();
@@ -36,26 +34,27 @@ public class Command {
 				flow.newNode((String)operands[0], (String)operands[1]);
 			});
 			break;
-			case LINK:
+			case LINK: // 1->0
 			Platform.runLater(()->{
 				flow.precedeGroup((String)operands[1], (String)operands[0]);
 				if(operands.length > 2) {
-					flow.setStroke((String)operands[1], (String)operands[0], (float)operands[2]);
+					flow.setGroupLink((String)operands[1], (String)operands[0], (float)operands[2]);
 				}
 			});
 			break;
-			case SEND:
+			case SEND: // from, to, message, color
+			final String color;
+			if(operands.length < 4) color = "default";
+			else color = (String)operands[3];
 			Platform.runLater(()->{
-				flow.connectNode((String)operands[0], (String)operands[1]);
+				flow.connectNode((String)operands[0], (String)operands[1], color);
 			});
+			app.output((String)operands[1], (String)operands[2]);
 			break;
 			case STATUS:
 			Platform.runLater(()->{
-				flow.setHalo((String)operands[0], (float)operands[1], (float)operands[2]);
+				flow.setGroupHalo((String)operands[0], (float)operands[1], (float)operands[2]);
 			});
-			break;
-			case COM:
-			app.output((String)operands[0], (String)operands[1]);
 			break;
 		}
 	}

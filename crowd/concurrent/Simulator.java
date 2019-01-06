@@ -101,13 +101,14 @@ public class Simulator extends Buildable {
 	public void send(String fromNode, String toNode, String message) {
 		String type = getData(toNode, "type");
 		if(type == null) return ;
+		parent.input(fromNode + ":" + message);
 		Prototype node = prototypes.get(type);
 		if(node == null) return;
-		node.receive(toNode, this, fromNode, message);
-		if(parent.getFlow() != null) {
-			Platform.runLater(()->{
-				parent.getFlow().setStroke(fromNode, toNode, 0);
-			});
-		}
+		node.receive(toNode, this, fromNode, message); // simulate
+		// if(parent.getFlow() != null) {
+			// Platform.runLater(()->{
+				// parent.getFlow().setStroke(fromNode, toNode, 0);
+			// });
+		// }
 	}
 }
