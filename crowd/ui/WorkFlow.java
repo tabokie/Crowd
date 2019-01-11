@@ -118,7 +118,7 @@ public class WorkFlow { // not thread safe
 			else {
 				fromNode.getParent().connectNode(fromNode, toNode, kvs);
 			}
-			nextFrame(kvs, 2000);
+			nextFrame(kvs, 200);
 		}
 		else {
 			List<KeyValue> kvs = new ArrayList<KeyValue>();

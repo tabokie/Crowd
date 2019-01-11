@@ -38,17 +38,25 @@ public class JavaRuntime {
 	 	// 	e.printStackTrace();
 	 	// }
 	}
-	public static Class LoadClassFromResource(String classname) throws Exception {
-		String filename = classname + ".java";
-		if(compile(filename)) {
-			return Class.forName("crowd.concurrent." + classname);
+	public static Class LoadClassFromResource(String classname) {
+		try {
+			String filename = classname + ".java";
+			if(compile(filename)) {
+				return Class.forName("crowd.concurrent." + classname);
+			}	
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
-	public static Object LoadObjectFromResource(String classname) throws Exception {
-		String filename = classname + ".java";
-		if(compile(filename)) {
-			return Class.forName("crowd.concurrent." + classname).newInstance();
+	public static Object LoadObjectFromResource(String classname) {
+		try {
+			String filename = classname + ".java";
+			if(compile(filename)) {
+				return Class.forName("crowd.concurrent." + classname).newInstance();
+			}	
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}

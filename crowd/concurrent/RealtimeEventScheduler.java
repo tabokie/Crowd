@@ -37,7 +37,7 @@ public class RealtimeEventScheduler extends Thread implements EventScheduler{
 		}
 	}
 	
-	private float millisUnit = 100; // default 0.1 sec
+	private float millisUnit = 1000; // default 1 sec
 	public void setTimeUnit(float millis) {
 		if(millis > 0) {
 			millisUnit = millis;

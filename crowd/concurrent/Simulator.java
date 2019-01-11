@@ -5,11 +5,12 @@ import java.util.*;
 
 import javafx.application.Platform;
 
-// import crowd.util.Pair;
 import javafx.util.Pair;
 import crowd.App;
 import crowd.Buildable;
+import crowd.Command;
 import crowd.ui.*;
+import crowd.util.JavaRuntime;
 import crowd.port.OPort;
 
 public class Simulator extends Buildable implements OPort {
@@ -24,7 +25,23 @@ public class Simulator extends Buildable implements OPort {
 	public Simulator(App parent) {
 		super(parent);
 	}
-	public boolean send(String target, String message) {
+	public boolean send(String target, Object message) {
+		return false;
+	}
+	public boolean send(Object message) {
+		if(!(message instanceof Command)) return false;
+		Command cmd = (Command) message;
+		switch(cmd.operator) {
+			case Command.START: // name type group
+			addNode((String)cmd.operands[0], (String)cmd.operands[1], (String)cmd.operands[2]);
+			break;
+			case Command.SHUTDOWN:
+			shutdownNode((String)cmd.operands[0]);
+			break;
+			case Command.PROTOTYPE:
+			addPrototype((String)cmd.operands[0], (Prototype) JavaRuntime.LoadObjectFromResource((String)cmd.operands[0]));
+			break;
+		}
 		return false;
 	}
 	public void close() {
@@ -60,7 +77,11 @@ public class Simulator extends Buildable implements OPort {
 	private static int autoId = 0;
 	private static String autoGroupId() {
 		autoId ++;
-		return "auto-" + String.valueOf(autoId);
+		return "-auto-gen-" + String.valueOf(autoId) + "-";
+	}
+	public Simulator shutdownNode(String name) {
+		nodeState.put(name, null);
+		return this;
 	}
 	public Simulator addNode(String name, String type, String group, Pair<String, Object>... kvs) {
 		if(group == null) {

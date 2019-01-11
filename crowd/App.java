@@ -128,9 +128,10 @@ public class App extends Application {
   public void input(Command cmd) {
   	cmd.dispatch(this);
   }
-  public void output(String target, String message) {
+  public void output(String target, Object message) {
   	for(OPort port : oports) {
-  		port.send(target, message);
+  		if(target == null) port.send(message);
+  		else port.send(target, message);
   	}
   }
 

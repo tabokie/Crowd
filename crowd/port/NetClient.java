@@ -78,7 +78,8 @@ public class NetClient extends Buildable implements OPort {
 			}
 		}
 	}
-	public boolean send(String target, String message) {
+	public boolean send(String target, Object message) {
+		if(!(message instanceof String)) return false;
 		ServerMeta meta = connected.get(target);
 		if(meta == null) {
 			return false;
@@ -90,6 +91,9 @@ public class NetClient extends Buildable implements OPort {
 			return false;
 		}
 		return true;
+	}
+	public boolean send(Object message) {
+		return false;
 	}
 	
 }

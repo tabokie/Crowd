@@ -101,7 +101,8 @@ public class NetServer extends Buildable implements OPort {
 		}
 		return parent;
 	}
-	public boolean send(String target, String message) {
+	public boolean send(String target, Object message) {
+		if(!(message instanceof String)) return false;
 		ClientMeta ret = clients.get(target);
 		if(ret == null) return false;
 		try {
@@ -111,6 +112,9 @@ public class NetServer extends Buildable implements OPort {
 			return false;
 		}
 		return true;
+	}
+	public boolean send(Object message) {
+		return false;
 	}
 	
 }

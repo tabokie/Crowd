@@ -19,6 +19,7 @@ public class Command {
 	// for simulating
 	public static final int START = 7;
 	public static final int SHUTDOWN = 8;
+	public static final int PROTOTYPE = 9;
 
 	public void dispatch(App app) {
 		final WorkFlow flow = app.getFlow();
@@ -60,8 +61,13 @@ public class Command {
 			});
 			break;
 			case START:
+			app.output(null, this);
 			break;
 			case SHUTDOWN:
+			app.output(null, this);
+			break;
+			case PROTOTYPE:
+			app.output(null, this);
 			break;
 		}
 	}

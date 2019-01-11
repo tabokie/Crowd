@@ -15,7 +15,7 @@ public class ChildLink {
 	public Vec2f toPoint = new Vec2f();
 	public Vec2f centerPoint = new Vec2f();
 	private boolean speculativeStateReady = false;
-	private final static float initialStrokeWidth = 0.4f;
+	private final static float initialStrokeWidth = 1f;
 	ChildLink(Arc c) {
 		curve = c;
 	}
@@ -125,12 +125,19 @@ public class ChildLink {
 		}
 		speculativeStateReady = false;
 		// reset stroke
-		curve.setStrokeWidth(initialStrokeWidth);
 		curve.setStroke(color);
+		curve.setStrokeWidth(initialStrokeWidth);
 		kvs.add(new KeyValue(curve.strokeWidthProperty(), 0));
 	}
 	static public void solveChildLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy) { // clockwise ?
-		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
+		float denom;
+		do{ // (bx-ax, by-ay)
+			denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
+			if(Math.abs(denom) < 0.005f) {
+				cx += Math.abs(by-ay) * 0.05f;
+				cy += Math.abs(bx-ax) * 0.05f;
+			} else break;
+		}while(true);
 		float w1 = ax * (cx-ax) + ay * (cy-ay);
 		float w2 = cx * (bx-ax) + cy * (by-ay);
 		float centerX = (w1 * (by-ay) - w2 * (cy-ay)) / denom;
@@ -157,6 +164,13 @@ public class ChildLink {
 	}
 	static public void solveChildLink(Arc c, float ax, float ay, float bx, float by, float cx, float cy, List<KeyValue> kvs) {
 		float denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
+		do{ // (bx-ax, by-ay)
+			denom = (cx-ax) * (by-ay) - (bx-ax) * (cy-ay);
+			if(Math.abs(denom) < 0.005f) {
+				cx += Math.abs(by-ay) * 0.05f;
+				cy += Math.abs(bx-ax) * 0.05f;
+			} else break;
+		}while(true);
 		float w1 = ax * (cx-ax) + ay * (cy-ay);
 		float w2 = cx * (bx-ax) + cy * (by-ay);
 		float centerX = (w1 * (by-ay) - w2 * (cy-ay)) / denom;

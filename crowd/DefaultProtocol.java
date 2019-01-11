@@ -44,6 +44,9 @@ public class DefaultProtocol implements Protocol {
       else if(tokens[1].equals("shutdown")) { // node name
         return new Command(tokens[0], Command.SHUTDOWN, tokens[2]);
       }
+      else if(tokens[1].equals("prototype")) {
+        return new Command(tokens[0], Command.PROTOTYPE, tokens[2]);
+      }
       else {
       	return new Command(tokens[0], Command.EMPTY, input.substring(input.indexOf(" ") + 1));
       }
