@@ -94,7 +94,13 @@ public class App extends Application {
   	}
     primaryStage.setTitle("Crowd");
     primaryStage.setScene(scene);
-    primaryStage.show();
+    primaryStage.show(); // block here
+  }
+  @Override
+  public void stop() {
+  	for(OPort port: oports) {
+  		port.close();
+  	}
   }
   @Override
   public void init() throws Exception {

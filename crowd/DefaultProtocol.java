@@ -17,7 +17,7 @@ public class DefaultProtocol implements Protocol {
       else if(tokens[1].equals("node")) {
         return new Command(tokens[0], Command.NODE, tokens[2], tokens[3]); // name group
       }
-      else if(tokens[1].equals("glink")) {
+      else if(tokens[1].equals("link")) {
         if(tokens.length > 4) {
           return new Command(tokens[0], Command.LINK, tokens[2], tokens[3], Float.parseFloat(tokens[4])); // to from width
         }
@@ -35,6 +35,15 @@ public class DefaultProtocol implements Protocol {
       else if(tokens[1].equals("status")) {
         return new Command(tokens[0], Command.STATUS, tokens[2], Float.parseFloat(tokens[3]), Float.parseFloat(tokens[4]) ); // name, radius, progress
       }
+      else if(tokens[1].equals("start")) { // name, type, group
+        if(tokens.length >= 5)
+          return new Command(tokens[0], Command.START, tokens[2], tokens[3], tokens[4]);
+        else
+          return new Command(tokens[0], Command.START, tokens[2], tokens[3], null); // auto grouping
+      }
+      else if(tokens[1].equals("shutdown")) { // node name
+        return new Command(tokens[0], Command.SHUTDOWN, tokens[2]);
+      }
       else {
       	return new Command(tokens[0], Command.EMPTY, input.substring(input.indexOf(" ") + 1));
       }
@@ -45,3 +54,4 @@ public class DefaultProtocol implements Protocol {
 		return "user:wowo";
 	}
 }
+

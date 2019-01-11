@@ -1,8 +1,12 @@
 package crowd.concurrent;
 
 import java.util.concurrent.atomic.*;
+import java.util.Map;
 
 public class EchoPrototype implements Prototype {
+	public void init(Map<String, Object> datas) {
+		datas.put("count", new AtomicInteger(0));
+	}
 	public void receive(String thisNode, Simulator simulator, String fromNode, String message) {
 		System.out.println(thisNode + " receives: " + message);
 		simulator.getScheduler().enqueue(3, (Actor actor) -> {

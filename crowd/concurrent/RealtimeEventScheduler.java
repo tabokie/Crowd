@@ -47,7 +47,8 @@ public class RealtimeEventScheduler extends Thread implements EventScheduler{
 	@Override
 	public void run() {
 		millisReset();
-		while(!closed.get() || actorQueue.readMin() != null || findUnfinished() >= 0) {
+		// while(!closed.get() || actorQueue.readMin() != null || findUnfinished() >= 0) {
+		while(!closed.get()) {
 			timestamp = (int) (millisGet() / millisUnit);
 			// update buffer
 			for(int i = 0; i < size; i ++) { // clean up
@@ -58,7 +59,7 @@ public class RealtimeEventScheduler extends Thread implements EventScheduler{
 					continue;
 				}
 			}
-			while(true) {
+			while(!closed.get()) {
 				Actor actor = actorQueue.readMin();
 				if(actor != null && actor.timestamp <= timestamp) {
 					// actor allowed to schedule

@@ -17,8 +17,8 @@ public class SimulatorApp extends App {
 		.build(Container.class).loadCompact().build()
 		.build(Simulator.class)
 		.addPrototype("echo", (Prototype) JavaRuntime.LoadObjectFromResource("DynamicPrototype"))
-		.addNode("left", "echo", new Pair("target", "right"), new Pair("count", new AtomicInteger(0)))
-		.addNode("right", "echo", new Pair("count", new AtomicInteger(0)))
+		.addNode("left", "echo", null, new Pair("target", "right"))
+		.addNode("right", "echo", null)
 		.setStartup("left").build();
 	}
 	public static void main(String[] args) {

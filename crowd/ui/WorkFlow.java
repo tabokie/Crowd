@@ -64,7 +64,7 @@ public class WorkFlow { // not thread safe
 		return newGroup(name, null);
 	}
 	public String newGroup(String name, String[] requisite) {
-		System.out.println("New group: " + name);
+		// System.out.println("New group: " + name);
 		GroupNode group = groups.get(name);
 		if(group != null) {
 			return new String("find duplicated group named " + name);
@@ -91,6 +91,7 @@ public class WorkFlow { // not thread safe
 		nextFrame(group, 2000);
 		return null;
 	}
+	// input from and to GroupId
 	public String precedeGroup(String fromName, String toName) {
 		GroupNode fromNode = groups.get(fromName);
 		GroupNode toNode = groups.get(toName);
@@ -98,6 +99,7 @@ public class WorkFlow { // not thread safe
 		nextFrame(2000);
 		return null;
 	}
+	// input two NodeId
 	public String connectNode(String fromName, String toName, String color) {
 		ChildNode fromNode = nodes.get(fromName);
 		ChildNode toNode = nodes.get(toName);

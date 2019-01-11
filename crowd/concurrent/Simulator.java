@@ -10,8 +10,9 @@ import javafx.util.Pair;
 import crowd.App;
 import crowd.Buildable;
 import crowd.ui.*;
+import crowd.port.OPort;
 
-public class Simulator extends Buildable {
+public class Simulator extends Buildable implements OPort {
 	// private static Protocol defaultProtocol = new DefaultProtocol();
 	// private Protocol protocol = null;
 	private Map<String, Prototype> prototypes = new ConcurrentHashMap<String, Prototype>();
@@ -23,9 +24,15 @@ public class Simulator extends Buildable {
 	public Simulator(App parent) {
 		super(parent);
 	}
+	public boolean send(String target, String message) {
+		return false;
+	}
+	public void close() {
+		scheduler.close();
+	}
 	public App build() {
 		scheduler.start();
-		// scheduler.close();
+		parent.addOPort(this);
 		return parent;
 	}
 	// builder
@@ -41,15 +48,25 @@ public class Simulator extends Buildable {
 			Prototype node = prototypes.get(type);
 			node.start(name, this); // only push to queue
 			if(parent.getFlow() != null) {
+				final String fromGroup = getData(name, "group");
+				final String toGroup = getData(getData(name, "target"), "group");
 				Platform.runLater(()->{
-					parent.getFlow().precedeGroup(name, getData(name, "target"));
+					parent.getFlow().precedeGroup(fromGroup, toGroup);
 				});
 			}
 		}
 		return this;
 	}
-	public Simulator addNode(String name, String type, Pair<String, Object>... kvs) {
-		Map<String, Object> state = addNode(name, type);
+	private static int autoId = 0;
+	private static String autoGroupId() {
+		autoId ++;
+		return "auto-" + String.valueOf(autoId);
+	}
+	public Simulator addNode(String name, String type, String group, Pair<String, Object>... kvs) {
+		if(group == null) {
+			group = autoGroupId();
+		}
+		Map<String, Object> state = addNode(name, type, group);
 		for(int i = 0; i < kvs.length; i++) {
 			state.put(kvs[i].getKey(), kvs[i].getValue());
 		}
@@ -76,28 +93,7 @@ public class Simulator extends Buildable {
 		Map<String, Object> datas = getDatas(node);
 		datas.put(name, data);
 	}
-	private Map<String, Object> addNode(String name, String type) {
-		Map<String, Object> datas = new ConcurrentHashMap<String, Object>();
-		nodeState.put(name, datas);
-		datas.put("type", type);
-		if(parent.getFlow() != null) {
-			Platform.runLater(()->{
-				parent.getFlow().newGroup(name);
-			});
-		}
-		return datas;
-	}
-	public void startNode(String name) {
-		String type = getData(name, "type");
-		if(type == null) return ;
-		Prototype node = prototypes.get(type);
-		node.start(name, this);
-		if(parent.getFlow() != null) {
-			Platform.runLater(()->{
-				parent.getFlow().precedeGroup(name, getData(name, "target"));
-			});
-		}
-	}
+	// runtime operation
 	public void send(String fromNode, String toNode, String message) {
 		String type = getData(toNode, "type");
 		if(type == null) return ;
@@ -105,10 +101,30 @@ public class Simulator extends Buildable {
 		Prototype node = prototypes.get(type);
 		if(node == null) return;
 		node.receive(toNode, this, fromNode, message); // simulate
-		// if(parent.getFlow() != null) {
-			// Platform.runLater(()->{
-				// parent.getFlow().setStroke(fromNode, toNode, 0);
-			// });
-		// }
+		if(parent.getFlow() != null) {
+			Platform.runLater(()->{
+				parent.getFlow().connectNode(fromNode, toNode,null);
+			});
+		}
 	}
+	// private
+	private Map<String, Object> addNode(String name, String type, String group) {
+		Map<String, Object> datas = new ConcurrentHashMap<String, Object>();
+		nodeState.put(name, datas);
+		datas.put("type", type);
+		datas.put("group", group);
+		Prototype prototype = prototypes.get(type);
+		if(prototype != null) {
+			prototype.init(datas);
+		}
+		if(parent.getFlow() != null) {
+			Platform.runLater(()->{
+				parent.getFlow().newGroup(group);
+				parent.getFlow().newNode(name, group);
+			});
+		}
+		return datas;
+	}
+
+
 }

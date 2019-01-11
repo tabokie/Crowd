@@ -16,6 +16,9 @@ public class Command {
 	public static final int LINK = 4; // connect group, with force[Opt]
 	public static final int SEND = 5; // connect and send message to node, with force and color, could upgrade to group ui
 	public static final int STATUS = 6; // group progress
+	// for simulating
+	public static final int START = 7;
+	public static final int SHUTDOWN = 8;
 
 	public void dispatch(App app) {
 		final WorkFlow flow = app.getFlow();
@@ -55,6 +58,10 @@ public class Command {
 			Platform.runLater(()->{
 				flow.setGroupHalo((String)operands[0], (float)operands[1], (float)operands[2]);
 			});
+			break;
+			case START:
+			break;
+			case SHUTDOWN:
 			break;
 		}
 	}

@@ -60,6 +60,9 @@ public class NetServer extends Buildable implements OPort {
 		});
 		return this;
 	}
+	public void close() {
+		close.set(true);
+	}
 	private void serve(Socket client) {
 		ObjectInputStream is = null;
 		String name = null;

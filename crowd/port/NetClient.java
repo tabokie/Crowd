@@ -3,6 +3,7 @@ package crowd.port;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.*;
 import java.net.Socket;
 
@@ -13,6 +14,7 @@ import crowd.Command;
 public class NetClient extends Buildable implements OPort {
 	private Map<String, ServerMeta> connected = new ConcurrentHashMap<String, ServerMeta>();
 	private ExecutorService threadPool = Executors.newFixedThreadPool(1);
+	private AtomicBoolean close = new AtomicBoolean(false);
 	private class ServerMeta {
 		public Socket socket;
 		public ObjectOutputStream os = null;
@@ -35,6 +37,9 @@ public class NetClient extends Buildable implements OPort {
 		parent.addOPort(this);
 		return parent;
 	}
+	public void close() {
+		close.set(true);
+	}
 	public NetClient register(String name, String ip, int port) {
 		try {
 			final Socket newSocket;
@@ -55,7 +60,7 @@ public class NetClient extends Buildable implements OPort {
 			meta = new ServerMeta(socket);
 			connected.put(name, meta);
 			is = new ObjectInputStream(socket.getInputStream()); // will block until server send?
-			while(socket.isConnected()) {
+			while(socket.isConnected() && !close.get()) {
 				String message = (String) is.readObject();
 				parent.input(message);
 			}
