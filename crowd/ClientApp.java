@@ -7,7 +7,7 @@ import crowd.concurrent.EchoPrototype;
 import crowd.ui.Container;
 import crowd.port.NetClient;
 
-public class ClientApp extends App {
+public class ClientApp extends App { // test using send server hello
 	@Override
 	public void init() {
 		this.setName("client");
