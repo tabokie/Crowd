@@ -26,21 +26,35 @@ public class SimulatorApp extends App {
 		this.buildWorkflow().buildChatbox()
 		.build(Container.class).loadCompact().build()
 		.build(Simulator.class)
+		//
 		.addPrototype("2pc", new TwoPhasePrototype())
 		.addPrototype("echo", new EchoPrototype())
-		.addNode("1.1", "2pc", "1", 
+		.addNode("2.1", "2pc", "2", 
 			new Pair("leader", new Boolean(true)), 
-			new Pair("members", new String[]{"1.2", "1.3", "1.4", "1.5"}), 
+			new Pair("members", new String[]{"2.2", "2.3", "2.4", "2.5"}), 
 			new Pair("phase", new Integer(0)),
 			new Pair("seq", new Integer(0)),
 			new Pair("response", new Integer(0)),
-			new Pair("request", null))
-		.addNode("1.2", "2pc", "1")
-		.addNode("1.3", "2pc", "1")
-		.addNode("1.4", "2pc", "1")
-		.addNode("1.5", "2pc", "1")
-		.addNode("2", "echo", null)
-		.setStartup("1.1").build();
+			new Pair("request", "null"))
+		.addNode("2.2", "2pc", "2")
+		.addNode("2.3", "2pc", "2")
+		.addNode("2.4", "2pc", "2")
+		.addNode("2.5", "2pc", "2")
+		.addNode("3.1", "2pc", "3", 
+			new Pair("leader", new Boolean(true)), 
+			new Pair("members", new String[]{"3.2", "3.3", "3.4", "3.5", "3.6", "3.7"}), 
+			new Pair("phase", new Integer(0)),
+			new Pair("seq", new Integer(0)),
+			new Pair("response", new Integer(0)),
+			new Pair("request", "null"))
+		.addNode("3.2", "2pc", "3")
+		.addNode("3.3", "2pc", "3")
+		.addNode("3.4", "2pc", "3")
+		.addNode("3.5", "2pc", "3")
+		.addNode("3.6", "2pc", "3")
+		.addNode("3.7", "2pc", "3")
+		.addNode("1", "echo", null, new Pair("target", new String[]{"2.1", "3.1"}))
+		.setStartup("1").build();
 	}
 	public static void main(String[] args) {
 		launch(args);

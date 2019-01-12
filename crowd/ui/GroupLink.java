@@ -13,7 +13,7 @@ public class GroupLink {
 	public String toGroup;
 	// have tried blend(no isolation), mask with main curve(no repeat mask allowed)
 	public RippleModifier curve;
-	private final static float initialStrokeWidth = 0.5f;
+	private final static float initialStrokeWidth = 0.3f;
 	GroupLink(Pane p) {
 		curve = RippleModifier.NewCubicCurve(p);
 	}

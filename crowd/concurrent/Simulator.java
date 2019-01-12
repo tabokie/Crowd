@@ -66,10 +66,12 @@ public class Simulator extends Buildable implements OPort {
 			node.start(name, this); // only push to queue
 			if(parent.getFlow() != null) {
 				final String fromGroup = getData(name, "group");
-				final String toGroup = getData(getData(name, "target"), "group");
-				Platform.runLater(()->{
-					parent.getFlow().precedeGroup(fromGroup, toGroup);
-				});
+				final String[] toNode = getData(name, "target");
+				for(String to: toNode) {
+					Platform.runLater(()->{
+						parent.getFlow().precedeGroup(fromGroup, getData(to, "group"));
+					});	
+				}
 			}
 		}
 		return this;

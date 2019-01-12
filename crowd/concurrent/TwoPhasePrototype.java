@@ -17,7 +17,7 @@ public class TwoPhasePrototype implements Prototype {
 		Object lock = simulator.getData(thisNode, "lock");
 		synchronized(lock) { // refuse to use atomic
 			if(!simulator.<Boolean>getData(thisNode, "leader")) { // simple echo
-				simulator.getScheduler().enqueue(1, (Actor actor)-> {
+				simulator.getScheduler().enqueue((int)(4 * Math.random()), (Actor actor)-> {
 					simulator.send(thisNode, fromNode, message);
 				});
 				return ;

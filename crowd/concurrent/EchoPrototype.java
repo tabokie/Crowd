@@ -3,6 +3,8 @@ package crowd.concurrent;
 import java.util.concurrent.atomic.*;
 import java.util.Map;
 
+import javafx.application.Platform;
+
 public class EchoPrototype implements Prototype {
 	public void init(Map<String, Object> datas) {
 		datas.put("count", new AtomicInteger(0));
@@ -12,6 +14,10 @@ public class EchoPrototype implements Prototype {
 		simulator.getScheduler().enqueue(3, (Actor actor) -> {
 			AtomicInteger countRef = simulator.getData(thisNode, "count");
 			final int count = countRef.getAndIncrement();
+			final String group = simulator.getData(thisNode, "group");
+			Platform.runLater(()->{
+				simulator.getParent().getFlow().setGroupHalo(group, 10, count / 10.0f);
+			});
 			simulator.send(thisNode, fromNode, "hello from " + thisNode); // send back
 			actor.act(5, ()->{ // wait for 5 second and check
 				if( simulator.<AtomicInteger>getData(thisNode, "count").get() <= count) {
@@ -27,9 +33,13 @@ public class EchoPrototype implements Prototype {
 		simulator.getScheduler().enqueue(0, (Actor actor) -> {
 			AtomicInteger countRef = simulator.getData(thisNode, "count");
 			countRef.set(0);
-			simulator.send(thisNode, simulator.getData(thisNode, "target"), "hello from " + thisNode);
+			String[] targets = simulator.getData(thisNode, "target");
+			for(String t : targets) {
+				simulator.send(thisNode, t, "hello from " + thisNode);
+			}
+			final int size = targets.length;
 			actor.act(5, ()->{ // wait for 5 second and check
-				if( simulator.<AtomicInteger>getData(thisNode, "count").get() == 0) {
+				if( simulator.<AtomicInteger>getData(thisNode, "count").get() < size) {
 					System.out.println("Oops, didn't get response after 5 seconds");
 				}
 				else {

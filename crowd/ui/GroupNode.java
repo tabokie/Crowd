@@ -47,7 +47,7 @@ public class GroupNode {
 	private static void configureCenter(Circle center) {
 		center.setCenterX(-1);
 		center.setCenterY(-1);
-		center.setRadius(1);
+		center.setRadius(5.5);
 		center.setFill(Color.BLACK);
 		center.setStrokeWidth(0);
 	}

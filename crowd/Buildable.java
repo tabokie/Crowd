@@ -13,4 +13,7 @@ public abstract class Buildable {
 			parent = app;
 	}
 	public abstract App build();
+	public App getParent() {
+		return parent;
+	}
 }

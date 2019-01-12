@@ -132,7 +132,57 @@ public class MyPrototype implements Prototype {
 Currently support algorithm:
 
 * [ ] Lamport clock
-* [ ] 2PC
+* [x] Echo Server
+* [x] 2PC
+
+Setup cluster in several lines:
+
+```Java
+this.buildWorkflow().buildChatbox()
+.build(Container.class).loadCompact().build()
+.build(Simulator.class)
+// add preset protocol, or load dynamicly
+.addPrototype("2pc", new TwoPhasePrototype())
+.addPrototype("echo", new EchoPrototype())
+// .addPrototype("dynamic", (Prototype) JavaRuntime.LoadObjectFromResource("DynamicPrototype"))
+// setup leader state
+.addNode("2.1", "2pc", "2", 
+  new Pair("leader", new Boolean(true)), 
+  new Pair("members", new String[]{"2.2", "2.3", "2.4", "2.5"}), 
+  new Pair("phase", new Integer(0)),
+  new Pair("seq", new Integer(0)),
+  new Pair("response", new Integer(0)),
+  new Pair("request", "null"))
+// setup standby state
+.addNode("2.2", "2pc", "2")
+.addNode("2.3", "2pc", "2")
+.addNode("2.4", "2pc", "2")
+.addNode("2.5", "2pc", "2")
+// setup leader state
+.addNode("3.1", "2pc", "3", 
+  new Pair("leader", new Boolean(true)), 
+  new Pair("members", new String[]{"3.2", "3.3", "3.4", "3.5", "3.6", "3.7"}), 
+  new Pair("phase", new Integer(0)),
+  new Pair("seq", new Integer(0)),
+  new Pair("response", new Integer(0)),
+  new Pair("request", "null"))
+.addNode("3.2", "2pc", "3")
+.addNode("3.3", "2pc", "3")
+.addNode("3.4", "2pc", "3")
+.addNode("3.5", "2pc", "3")
+.addNode("3.6", "2pc", "3")
+.addNode("3.7", "2pc", "3")
+// setup requester: echo server
+.addNode("1", "echo", null, new Pair("target", new String[]{"2.1", "3.1"}))
+// set triggering machine
+.setStartup("1").build();
+```
+
+And a complete cluster is simulated as:
+
+![consensus](docs/img/2pc-consensus.png)
+
+![response](docs/img/2pc-response.png)
 
 ## Crowd Port
 

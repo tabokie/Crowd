@@ -24,7 +24,7 @@ public class RippleModifier{
 	private boolean endReady = false; 
 	private double endX = -1, endY = -1;
 	private boolean baseColorReady = false, rippleColorReady = false;
-	private Color base = Color.BLACK, ripple = Color.GREEN, rripple = Color.RED;
+	private Color base = Color.DIMGRAY, ripple = Color.GREEN, rripple = Color.RED;
 	private boolean baseWidthReady = false, rippleWidthReady = false;
 	private double baseWidth = 1, rippleWidth = 3;
 	private boolean progressReady = false;
